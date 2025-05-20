@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Order</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 30px;
+            background-color: #6DB7DB;
+            color: #333;
+            position: relative;
+        }
+        .header-container {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            margin: 30px 0;
+            position: relative;
+        }
+        .page-header {
+            color: white;
+            font-size: 90px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            font-weight: 600;
+            margin: 0;
+            margin-left: 140px;
+        }
+        .header-image {
+            width: 270px;
+            height: 270px;
+            top: 10px;
+            transform: translate(-50%, -50%) rotate(80deg);
+            object-fit: contain;
+            position: absolute;
+            left: 120vh;
+            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.2));
+        }
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            width: 90%;
+            max-width: 1500px;
+            margin: 0 auto 20px auto;
+            min-height: 80vh;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 25px;
+            font-size: 1.05rem;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 15px;
+            text-align: left;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+            font-size: 1.1rem;
+            padding: 18px 15px;
+        }
+        tr:nth-child(even) {
+            background-color: #f8f8f8;
+        }
+        tr:hover {
+            background-color: #e6f7ff;
+        }
+        .back-button {
+            position: absolute;
+            top: 40px;
+            right: 40px;
+            padding: 12px 24px;
+            background-color: transparent;
+            color: white;
+            border: 2px solid white;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            z-index: 100;
+        }
+        .back-button:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .order-form {
+            margin-top: 40px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .form-section {
+            flex: 0 1 45%;
+            min-width: 300px;
+            max-width: 500px;
+        }
+
+        input[type="text"],
+        select {
+            width: 50%;
+            padding: 10px;
+            margin-bottom: 25px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+
+        .addons table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .summary {
+            margin-top: 20px;
+            border-top: 1px solid #000;
+            padding-top: 10px;
+        }
+
+        .summary p {
+            margin: 5px 0;
+        }
+
+        .form-submit {
+            width: 100%;
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        button {
+            background-color: white;
+            color: #00aaff;
+            border: 1px solid #00aaff;
+            border-radius: 8px;
+            padding: 10px 30px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #00aaff;
+            color: white;
+        }
+
+        .qty-btn {
+            background-color: #00aaff;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            font-size: 16px;
+            border-radius: 4px;
+            margin: 0 5px;
+            cursor: pointer;
+        }
+
+        .qty-btn:hover {
+            background-color: #0077aa;
+        }
+
+        /* Responsive stacking for smaller screens */
+        @media (max-width: 768px) {
+            .order-form {
+                flex-direction: column;
+            }
+
+            .form-section {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="#" class="back-button"> back</a>
+    
+    <div class="header-container">
+        <img src="bubbles.png" alt="Company Logo" class="header-image">
+        <h1 class="page-header">New Order</h1>
+    </div>
+    
+    <div class="container">
+        <form class="order-form">
+            <div class="form-section">
+            <label>Name:</label>
+            <input type="text" placeholder="Value">
+
+            <label>Contact No.:</label>
+            <input type="text" placeholder="Value">
+
+            <label>Pickup/Delivery</label>
+            <select >
+                <option>Value</option>
+            </select>
+
+            <label>For delivery, pick a location:</label>
+            <select>
+                <option>Current location:</option>
+            </select>
+            </div>
+
+            <div class="form-section">
+            <label>Order Weight</label>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <button type="button" id="weight-decrease" class="qty-btn">-</button>
+                <span id="order-weight">8</span> kg
+                <button type="button" id="weight-increase" class="qty-btn">+</button>
+            </div>
+
+            <div class="addons">
+                <table>
+                    <th>Add Ons</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <tr>
+                        <td>Towels</td>
+                        <td>P30</td>
+                        <td>
+                            <button type="button" class="qty-btn" data-action="decrease">-</button>
+                            <span class="qty-value">0</span>
+                            <button type="button" class="qty-btn" data-action="increase">+</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Bedsheets/ Pillowcases</td>
+                        <td>P50</td>
+                        <td>
+                            <button type="button" class="qty-btn" data-action="decrease">-</button>
+                            <span class="qty-value">0</span>
+                            <button type="button" class="qty-btn" data-action="increase">+</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Comforters</td>
+                        <td>P75</td>
+                        <td>
+                            <button type="button" class="qty-btn" data-action="decrease">-</button>
+                            <span class="qty-value">0</span>
+                            <button type="button" class="qty-btn" data-action="increase">+</button>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="summary">
+                <p>Sub Total: <span id="subtotal">PHP 0.00</span></p>
+                <p>PHP 50+ Delivery fee</p>
+                <p>Total Amount: <strong id="total">PHP 0.00</strong></p>
+            </div>
+
+            <div class="form-submit">
+            <button type="submit">Submit</button>
+            </div>
+        </form>
+    </div>
+   
+    <script>
+        document.querySelector('.back-button').addEventListener('click', function(e) {
+            e.preventDefault();
+            window.history.back();
+        });
+
+        const baseWeight = 8;
+        const basePrice = 150;
+        const extraKgPrice = 20;
+        const deliveryFee = 50;
+
+        const weightDisplay = document.getElementById('order-weight');
+        const weightDecrease = document.getElementById('weight-decrease');
+        const weightIncrease = document.getElementById('weight-increase');
+
+        function getOrderWeight() {
+            return parseInt(weightDisplay.textContent);
+        }
+
+        function calculateWeightPrice(weight) {
+            if (weight <= baseWeight) return basePrice;
+            return basePrice + (weight - baseWeight) * extraKgPrice;
+        }
+
+        function updateTotals() {
+            let subtotal = 0;
+
+            // Weight price
+            const weight = getOrderWeight();
+            subtotal += calculateWeightPrice(weight);
+
+            // Add-on prices
+            const rows = document.querySelectorAll('.addons tr');
+            rows.forEach(row => {
+                const name = row.querySelector('td:first-child')?.textContent;
+                const priceText = row.querySelector('td:nth-child(2)')?.textContent;
+                const price = parseInt(priceText?.replace("P", "") || "0");
+                const qty = parseInt(row.querySelector('.qty-value')?.textContent || "0");
+                subtotal += price * qty;
+            });
+
+            const total = subtotal + deliveryFee;
+
+            document.getElementById('subtotal').textContent = `P${subtotal.toFixed(2)}`;
+            document.getElementById('total').textContent = `P${total.toFixed(2)}`;
+        }
+
+        // Add-on quantity button logic
+        document.querySelectorAll('.qty-btn').forEach(button => {
+            const action = button.getAttribute('data-action');
+            if (!action) return; // Skip if no action (like weight buttons)
+
+            button.addEventListener('click', () => {
+                const qtySpan = button.parentElement.querySelector('.qty-value');
+                let currentQty = parseInt(qtySpan.textContent);
+
+                if (action === 'increase') {
+                    currentQty++;
+                } else if (action === 'decrease' && currentQty > 0) {
+                    currentQty--;
+                }
+
+                qtySpan.textContent = currentQty;
+                updateTotals();
+            });
+        });
+
+        // Order weight +/- buttons
+        weightIncrease.addEventListener('click', () => {
+            let weight = getOrderWeight();
+            weight++;
+            weightDisplay.textContent = weight;
+            updateTotals();
+        });
+
+        weightDecrease.addEventListener('click', () => {
+            let weight = getOrderWeight();
+            if (weight > baseWeight) {
+                weight--;
+                weightDisplay.textContent = weight;
+                updateTotals();
+            }
+        });
+
+        updateTotals(); // Run on load
+    </script>
+</body>
+</html>
