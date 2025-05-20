@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 30px;
+            background-color: #6DB7DB;
+            color: #333;
+            position: relative;
+        }
+        
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.15);
+            width: 90%;
+            max-width: 1500px;
+            margin: 0 auto 20px auto;
+            min-height: 80vh;
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            margin: 30px 0;
+            position: relative;
+        }
+
+        .header-image {
+            width: 270px;
+            height: 270px;
+            top: 10px;
+            transform: translate(-50%, -50%) rotate(80deg);
+            object-fit: contain;
+            position: absolute;
+            left: 120vh;
+            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.2));
+        }
+
+        h1 {
+            color: white;
+            font-size: 90px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            font-weight: 600;
+            margin: 0;
+            margin-left: 140px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 15px;
+            text-align: left;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+            font-size: 1.1rem;
+            padding: 18px 15px;
+        }
+        select {
+            padding: 4px;
+            width: 100%;
+            border: 1px solid #ddd;
+        }
+
+        select option {
+        background-color: white;
+        color: black;  
+        }
+
+        .action-btn {
+            margin: 2px;
+            padding: 4px 8px;
+            cursor: pointer;
+            border: 1px solid #ccc;
+            background: #f8f8f8;
+        }
+
+        .add-order-container{
+            text-align: center;
+            margin: 20px;
+        }
+        
+
+        .add-order-button {
+            text-align: center;
+            padding: 12px 24px;
+            background-color: green;
+            color: white;
+            border: 2px solid green;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+
+        }
+
+        .log-out-button {
+            margin: 20px;
+            position: absolute;
+            top: 40px;
+            right: 20px;
+            padding: 12px 24px;
+            background-color: transparent;
+            color: white;
+            border: 2px solid white;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            z-index: 100;
+        }
+
+        .order-history-button {
+            margin: 20px;
+            position: absolute;
+            top: 40px;
+            right: 150px;
+            padding: 12px 24px;
+            background-color: transparent;
+            color: white;
+            border: 2px solid white;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            z-index: 100;
+        }
+
+        .order-sales-button {
+            margin: 20px;
+            position: absolute;
+            top: 40px;
+            right: 330px;
+            padding: 12px 24px;
+            background-color: transparent;
+            color: white;
+            border: 2px solid white;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            z-index: 100;
+        }
+
+
+
+    </style>
+</head>
+<script>
+    // Check if user is logged in
+    if(!localStorage.getItem('isLoggedIn')) {
+        window.location.href = 'Sign_In_Page.html'; // Redirect to sign-in if not logged in
+    }
+    
+    // Log out functionality
+    document.querySelector('.log-out-button').addEventListener('click', function() {
+        localStorage.removeItem('isLoggedIn');
+        window.location.href = 'Sign_In_Page.html';
+    });
+</script>
+<body>
+    <div class="header-container">
+        <img src="images/bubbles.png" alt="Company Logo" class="header-image">
+        <h1 class="page-header">ORDER TRACKER</h1>
+    </div>
+
+    <div class="add-order-container">
+        <button class="add-order-button">+ Add New Order</button>
+    </div>
+
+     <a href="Sign_In_Page.html" class="log-out-button"> log out</a>
+     <a href="Order_History_Page.html" class="order-history-button">Order History</a>
+     <a href="Sales_Tracker_Page.html" class="order-sales-button"> Order Sales</a>
+
+    <div class="container">
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Name of Customer</th>
+                <th>Order ID</th>
+                <th>Payment Status</th>
+                <th>Order Status</th>
+                <th>Retrieval Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1/2/2025</td>
+                <td>Bob Marley</td>
+                <td>#001</td>
+                <td>
+                    <select>
+                        <option selected>Not yet Paid</option>
+                        <option>Paid</option>
+                    </select>
+                </td>
+                <td>
+                    <select>
+                        <option selected>Done</option>
+                        <option>In Progress</option>
+                        <option>Not Started</option>
+                    </select>
+                </td>
+                <td>
+                    <select>
+                        <option selected>To be Claimed</option>
+                        <option>To be Delivered</option>
+                        <option>Claimed</option>
+                        <option selected>Delivered</option>
+                    </select>
+                </td>
+                <td>
+                    <button class="action-btn">Save</button>
+                    <button class="action-btn">Delete</button>
+                </td>
+            </tr>
+            <tr>
+                <td>1/2/2025</td>
+                <td>Bob Marley</td>
+                <td>#001</td>
+                <td>
+                    <select>
+                        <option>Not yet Paid</option>
+                        <option selected>Paid</option>
+                    </select>
+                </td>
+                <td>
+                    <select>
+                        <option>Done</option>
+                        <option selected>In Progress</option>
+                        <option>Not Started</option>
+                    </select>
+                </td>
+                <td>
+                    <select>
+                        <option>To be Claimed</option>
+                        <option selected>To be Delivered</option>
+                        <option>Claimed</option>
+                        <option selected>Delivered</option>
+                    </select>
+                </td>
+                <td>
+                    <button class="action-btn">Save</button>
+                    <button class="action-btn">Delete</button>
+                </td>
+            </tr>
+            <tr>
+                <td>1/2/2025</td>
+                <td>Bob Marley</td>
+                <td>#001</td>
+                <td>
+                    <select>
+                        <option>Not yet Paid</option>
+                        <option selected>Paid</option>
+                    </select>
+                </td>
+                <td>
+                    <select>
+                        <option>Done</option>
+                        <option>In Progress</option>
+                        <option selected>Not Started</option>
+                    </select>
+                </td>
+                <td>
+                    <select>
+                        <option>To be Claimed</option>
+                        <option selected>To be Delivered</option>
+                        <option>Claimed</option>
+                        <option selected>Delivered</option>
+
+                    </select>
+                </td>
+                <td>
+                    <button class="action-btn">Save</button>
+                    <button class="action-btn">Delete</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+    <script>
+        // Basic button functionality
+        document.querySelectorAll('.action-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                if (e.target.textContent === 'Delete') {
+                    if (confirm('Delete this order?')) {
+                        e.target.closest('tr').remove();
+                    }
+                } else if (e.target.textContent === 'Save') {
+                    alert('Changes saved! (In a real app, this would update the database)');
+                } else if (e.target.textContent.includes('Add')) {
+                    alert('Add order form would appear here');
+                }
+            });
+        });
+
+        function updateSelectStyle(select) {
+        const value = select.value;
+
+        select.style.backgroundColor = "";
+
+        if (value === "Paid" || value === "Done") {
+        select.style.backgroundColor = "#d4edda"; 
+        } else if (value === "Not yet Paid" || value === "Not Started") {
+        select.style.backgroundColor = "#f8d7da";
+        } else if (value === "In Progress") {
+        select.style.backgroundColor = "#ADD8E6";
+        } else if (value === "To be Claimed" || value === "To be Delivered") {
+        select.style.backgroundColor = "#fff3cd"; 
+        } else if (value === "Claimed" || value === "Delivered") {
+        select.style.backgroundColor = "#d4edda"; 
+        }
+        }
+
+
+    document.querySelectorAll('select').forEach(select => {
+        updateSelectStyle(select); 
+        
+        select.addEventListener('change', function () {
+            updateSelectStyle(this);
+        });
+    });
+
+
+        
+    </script>
+</body>
+</html>
