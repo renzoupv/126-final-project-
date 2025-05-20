@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <a href="#" class="back-button"> back</a>
+    
+    <div class="header-container">
+        <img src="bubbles.png" alt="Company Logo" class="header-image">
+        <h1 class="page-header">SALES TRACKER</h1>
+    </div>
+    
+    <div class="container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Name of Customer</th>
+                    <th>Order ID</th>
+                    <th>Order Weight</th>
+                    <th>Amount</th>
+                    <th>Delivery Fee</th>
+                    <th>Total Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1/2/2025</td>
+                    <td>Bob Marley</td>
+                    <td>#001</td>
+                    <td>12 kg</td>
+                    <td>150 php</td>
+                    <td>-</td>
+                    <td>150 php</td>
+                </tr>
+                <tr>
+                    <td>1/2/2025</td>
+                    <td>Bob Marley</td>
+                    <td>#001</td>
+                    <td>8 kg</td>
+                    <td>120 php</td>
+                    <td>35 php</td>
+                    <td>155 php</td>
+                </tr>
+                <tr>
+                    <td>1/2/2025</td>
+                    <td>Bob Marley</td>
+                    <td>#001</td>
+                    <td>12 kg</td>
+                    <td>150 php</td>
+                    <td>35 php</td>
+                    <td>185 php</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // JavaScript to handle the back button functionality
+        document.querySelector('.back-button').addEventListener('click', function(e) {
+            e.preventDefault();
+            window.history.back();
+        });
+    </script>
+</body>
+</html>
