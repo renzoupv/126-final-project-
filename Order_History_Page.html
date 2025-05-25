@@ -273,16 +273,21 @@
                 `;
             }
 
+            if (type === 'retrieval') {
+                const checked = order.retrieval_status === 'Completed' ? '' : 'checked';
+                return `
+                    <label style="display:flex; align-items:center; gap:6px;">
+                        <input type="checkbox" class="retrieval-status" data-order-id="${order.order_id}" ${checked}>
+                        Completed
+                    </label>
+                `;
+            }
+
             const maps = {
                 order: {
                     class: 'order-status',
                     options: ['Not Started', 'In Progress', 'Done'],
                     current: order.order_status
-                },
-                retrieval: {
-                    class: 'retrieval-status',
-                    options: ['To be Claimed', 'To be Delivered', 'Claimed', 'Delivered'],
-                    current: order.retrieval_status
                 }
             };
 

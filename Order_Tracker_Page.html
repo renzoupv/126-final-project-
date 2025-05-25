@@ -371,12 +371,10 @@
             }
 
             if (type === 'retrieval') {
-                // Checkbox for payment status
                 const checked = order.retrieval_status === 'Completed' ? 'checked' : '';
-                // Using a checkbox with class payment-status and data attribute for order ID
                 return `
                     <label style="display:flex; align-items:center; gap:6px;">
-                        <input type="checkbox" class="payment-status" data-order-id="${order.order_id}" ${checked}>
+                        <input type="checkbox" class="retrieval-status" data-order-id="${order.order_id}" ${checked}>
                         Completed
                     </label>
                 `;
