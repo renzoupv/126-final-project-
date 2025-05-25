@@ -71,22 +71,6 @@
         tr:hover {
             background-color: #e6f7ff;
         }
-        .status-paid {
-            color: #27ae60;
-            font-weight: bold;
-        }
-        .status-done {
-            color: #27ae60;
-            font-weight: bold;
-        }
-        .status-claimed {
-            color: #e67e22;
-            font-weight: bold;
-        }
-        .status-delivered {
-            color: #27ae60;
-            font-weight: bold;
-        }
         .back-button {
             position: absolute;
             top: 40px;
@@ -107,6 +91,94 @@
             background-color: rgba(255, 255, 255, 0.1);
             transform: translateY(-2px);
         }
+        .action-btn {
+            margin: 2px;
+            padding: 6px 12px;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+        .save-btn {
+            background-color: #28a745;
+            color: white;
+        }
+        .save-btn:hover {
+            background-color: #218838;
+        }
+        .delete-btn {
+            background-color: #dc3545;
+            color: white;
+        }
+        .delete-btn:hover {
+            background-color: #c82333;
+        }
+        .action-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .alert {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 25px;
+            border-radius: 5px;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            z-index: 1000;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+        .alert.success {
+            background-color: #28a745;
+        }
+        .alert.error {
+            background-color: #dc3545;
+        }
+        .loading {
+            display: inline-block;
+            margin-left: 10px;
+        }
+        /* Status select elements */
+        select.payment-status,
+        select.order-status,
+        select.retrieval-status {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        /* Status colors for payment */
+        select.payment-status.not-paid { background-color: #f8d7da; }
+        select.payment-status.paid { background-color: #d4edda; }
+        /* Status colors for order */
+        select.order-status.not-started { background-color: #f8d7da; }
+        select.order-status.in-progress { background-color: #ADD8E6; }
+        select.order-status.done { background-color: #d4edda; }
+        /* Status colors for retrieval */
+        select.retrieval-status.to-be-claimed { background-color: #fff3cd; }
+        select.retrieval-status.to-be-delivered { background-color: #fff3cd; }
+        select.retrieval-status.claimed { background-color: #d4edda; }
+        select.retrieval-status.delivered { background-color: #d4edda; }
+
+        tr {
+            transition: all 0.3s ease;
+        }
+        
+        .fade-out {
+            opacity: 0;
+            height: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+            margin-top: 0;
+            margin-bottom: 0;
+            border-top-width: 0;
+            border-bottom-width: 0;
+            overflow: hidden;
+        }
     </style>
 </head>
 <body>
@@ -122,40 +194,302 @@
             <thead>
                 <tr>
                     <th>Date</th>
-                    <th>Name of Customer</th>
+                    <th>Customer</th>
                     <th>Order ID</th>
-                    <th>Payment Status</th>
-                    <th>Order Status</th>
-                    <th>Retrieval Status</th>
+                    <th>Payment</th>
+                    <th>Status</th>
+                    <th>Retrieval</th>
+                    <th>Total Amount</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="historyTableBody">
                 <tr>
-                    <td>1/2/2025</td>
-                    <td>Bob Marley</td>
-                    <td>#001</td>
-                    <td class="status-paid">Paid</td>
-                    <td class="status-done">Done</td>
-                    <td class="status-claimed">Claimed</td>
-                </tr>
-                <tr>
-                    <td>1/2/2025</td>
-                    <td>Bob Marley</td>
-                    <td>#001</td>
-                    <td class="status-paid">Paid</td>
-                    <td class="status-done">Done</td>
-                    <td class="status-delivered">Delivered</td>
-                </tr>
-                <tr>
-                    <td>1/2/2025</td>
-                    <td>Bob Marley</td>
-                    <td>#001</td>
-                    <td class="status-paid">Paid</td>
-                    <td class="status-done">Done</td>
-                    <td class="status-delivered">Delivered</td>
+                    <td colspan="8" class="loading">Loading completed orders...</td>
                 </tr>
             </tbody>
         </table>
     </div>
+
+    <script>
+        // Check authentication
+        if (!localStorage.getItem('isLoggedIn')) {
+            window.location.href = 'Sign_In_Page.html';
+        }
+
+        // Alert function
+        function showAlert(message, type) {
+            // Remove existing alerts
+            document.querySelectorAll('.alert').forEach(el => el.remove());
+            
+            const alert = document.createElement('div');
+            alert.className = `alert ${type}`;
+            alert.textContent = message;
+            document.body.appendChild(alert);
+            
+            setTimeout(() => {
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 300);
+            }, 3000);
+        }
+
+        // Loading indicator
+        function showLoading(show) {
+            const loader = document.getElementById('loadingIndicator');
+            if (show) {
+                if (!loader) {
+                    const div = document.createElement('div');
+                    div.id = 'loadingIndicator';
+                    div.style.position = 'fixed';
+                    div.style.top = '0';
+                    div.style.left = '0';
+                    div.style.right = '0';
+                    div.style.padding = '10px';
+                    div.style.backgroundColor = '#3498db';
+                    div.style.color = 'white';
+                    div.style.textAlign = 'center';
+                    div.style.zIndex = '1000';
+                    div.textContent = 'Loading...';
+                    document.body.appendChild(div);
+                } else {
+                    loader.style.display = 'block';
+                }
+            } else if (loader) {
+                loader.style.display = 'none';
+            }
+        }
+
+        // Create status select dropdown
+        function createStatusSelect(type, order) {
+            const maps = {
+                payment: {
+                    class: 'payment-status',
+                    options: ['Not yet Paid', 'Paid'],
+                    current: order.payment_status
+                },
+                order: {
+                    class: 'order-status',
+                    options: ['Not Started', 'In Progress', 'Done'],
+                    current: order.order_status
+                },
+                retrieval: {
+                    class: 'retrieval-status',
+                    options: ['To be Claimed', 'To be Delivered', 'Claimed', 'Delivered'],
+                    current: order.retrieval_status
+                }
+            };
+
+            const config = maps[type];
+            let html = `<select class="${config.class}" data-order-id="${order.order_id}">`;
+            
+            config.options.forEach(opt => {
+                html += `<option value="${opt}" ${opt === config.current ? 'selected' : ''}>${opt}</option>`;
+            });
+            
+            return html + '</select>';
+        }
+
+        // Update select element styling
+        function updateAllSelectStyles() {
+            const statusClasses = {
+                payment: {
+                    'Not yet Paid': 'not-paid',
+                    'Paid': 'paid'
+                },
+                order: {
+                    'Not Started': 'not-started',
+                    'In Progress': 'in-progress',
+                    'Done': 'done'
+                },
+                retrieval: {
+                    'To be Claimed': 'to-be-claimed',
+                    'To be Delivered': 'to-be-delivered',
+                    'Claimed': 'claimed',
+                    'Delivered': 'delivered'
+                }
+            };
+
+            Object.keys(statusClasses).forEach(type => {
+                document.querySelectorAll(`select.${type}-status`).forEach(select => {
+                    select.className = `${type}-status`;
+                    select.classList.add(statusClasses[type][select.value]);
+                });
+            });
+        }
+
+        // Delete order function
+        async function deleteOrder(orderId, row) {
+            if (!confirm('Are you sure you want to permanently delete this order from history?')) {
+                return;
+            }
+
+            const btn = row.querySelector('.delete-btn');
+            btn.disabled = true;
+            btn.textContent = 'Deleting...';
+
+            try {
+                const response = await fetch('delete_order.php', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ order_id: orderId })
+                });
+
+                // Check if response is JSON
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    const text = await response.text();
+                    throw new Error(text || 'Invalid server response');
+                }
+
+                const result = await response.json();
+                
+                if (!result.success) {
+                    throw new Error(result.error || 'Delete failed');
+                }
+                
+                // Add fade-out class for smooth transition
+                row.classList.add('fade-out');
+                
+                // Wait for transition to complete before removing
+                setTimeout(() => {
+                    row.remove();
+                    showAlert('Order deleted from history', 'success');
+                    
+                    // Check if table is empty
+                    const tbody = document.getElementById('historyTableBody');
+                    if (tbody.rows.length === 0) {
+                        tbody.innerHTML = `
+                            <tr>
+                                <td colspan="8" style="text-align: center; padding: 20px;">
+                                    No historical orders found
+                                </td>
+                            </tr>`;
+                    }
+                }, 300); // Matches the 0.3s transition duration
+            } catch (error) {
+                console.error('Delete Error:', error);
+                showAlert(error.message.includes('<') ? 'Server error occurred' : error.message, 'error');
+                btn.disabled = false;
+                btn.textContent = 'Delete';
+            }
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('delete-btn')) {
+                    const orderId = e.target.dataset.orderId;
+                    const row = e.target.closest('tr');
+                    deleteOrder(orderId, row);
+                }
+                
+                if (e.target.classList.contains('save-btn')) {
+                    const btn = e.target;
+                    const orderId = btn.dataset.orderId;
+                    const row = btn.closest('tr');
+                    
+                    btn.disabled = true;
+                    btn.textContent = 'Saving...';
+
+                    const paymentStatus = row.querySelector('.payment-status').value;
+                    const orderStatus = row.querySelector('.order-status').value;
+                    const retrievalStatus = row.querySelector('.retrieval-status').value;
+
+                    fetch('update_order.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            orderId: orderId,
+                            payment_status: paymentStatus,
+                            order_status: orderStatus,
+                            retrieval_status: retrievalStatus
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(result => {
+                        if (!result.success) throw new Error(result.error || 'Save failed');
+                        showAlert('Changes saved', 'success');
+                        updateAllSelectStyles();
+                    })
+                    .catch(error => {
+                        console.error('Save Error:', error);
+                        showAlert(error.message, 'error');
+                    })
+                    .finally(() => {
+                        btn.disabled = false;
+                        btn.textContent = 'Save';
+                    });
+                }
+            });
+        }
+
+        // Load order history
+        async function loadHistory() {
+            try {
+                showLoading(true);
+                const response = await fetch('get_history.php?t=' + Date.now());
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                const tbody = document.getElementById('historyTableBody');
+                tbody.innerHTML = '';
+
+                if (!result.success || !result.orders || result.orders.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="8" style="text-align: center; padding: 20px">
+                                No completed orders found
+                            </td>
+                        </tr>`;
+                    return;
+                }
+
+                result.orders.forEach(order => {
+                    const row = document.createElement('tr');
+                    row.dataset.orderId = order.order_id;
+                    
+                    row.innerHTML = `
+                        <td>${order.order_date}</td>
+                        <td>${order.name}</td>
+                        <td>${order.order_reference}</td>
+                        <td>${createStatusSelect('payment', order)}</td>
+                        <td>${createStatusSelect('order', order)}</td>
+                        <td>${createStatusSelect('retrieval', order)}</td>
+                        <td>₱${parseFloat(order.total_amount).toFixed(2)}</td>
+                        <td>
+                            <button class="action-btn save-btn" data-order-id="${order.order_id}">Save</button>
+                            <button class="action-btn delete-btn" data-order-id="${order.order_id}">Delete</button>
+                        </td>`;
+                    
+                    tbody.appendChild(row);
+                });
+
+                updateAllSelectStyles();
+                setupEventListeners();
+
+            } catch (error) {
+                console.error('Error loading history:', error);
+                document.getElementById('historyTableBody').innerHTML = `
+                    <tr>
+                        <td colspan="8" style="text-align: center; color: red; padding: 20px">
+                            Error loading order history: ${error.message}
+                        </td>
+                    </tr>`;
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadHistory();
+        });
+    </script>
 </body>
 </html>

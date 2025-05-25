@@ -25,6 +25,31 @@
             min-height: 80vh;
         }
 
+        /* Status select elements */
+        select.payment-status,
+        select.order-status,
+        select.retrieval-status {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        /* Status colors for payment */
+        select.payment-status.not-paid { background-color: #f8d7da; }
+        select.payment-status.paid { background-color: #d4edda; }
+
+        /* Status colors for order */
+        select.order-status.not-started { background-color: #f8d7da; }
+        select.order-status.in-progress { background-color: #ADD8E6; }
+        select.order-status.done { background-color: #d4edda; }
+
+        /* Status colors for retrieval */
+        select.retrieval-status.to-be-claimed { background-color: #fff3cd; }
+        select.retrieval-status.to-be-delivered { background-color: #fff3cd; }
+        select.retrieval-status.claimed { background-color: #d4edda; }
+        select.retrieval-status.delivered { background-color: #d4edda; }
+
         .header-container {
             display: flex;
             justify-content: flex-start;
@@ -52,6 +77,7 @@
             margin: 0;
             margin-left: 140px;
         }
+        
         table {
             width: 100%;
             border-collapse: collapse;
@@ -63,37 +89,52 @@
             padding: 15px;
             text-align: left;
         }
+        
         th {
             background-color: #3498db;
             color: white;
             font-size: 1.1rem;
             padding: 18px 15px;
         }
-        select {
-            padding: 4px;
-            width: 100%;
-            border: 1px solid #ddd;
-        }
-
-        select option {
-        background-color: white;
-        color: black;  
-        }
-
+        
         .action-btn {
             margin: 2px;
-            padding: 4px 8px;
+            padding: 6px 12px;
             cursor: pointer;
-            border: 1px solid #ccc;
-            background: #f8f8f8;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
         }
 
-        .add-order-container{
+        .save-btn {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .save-btn:hover {
+            background-color: #218838;
+        }
+
+        .delete-btn {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background-color: #c82333;
+        }
+
+        .action-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .add-order-container {
             text-align: center;
             margin: 20px;
         }
         
-
         .add-order-button {
             text-align: center;
             padding: 12px 24px;
@@ -106,12 +147,7 @@
             cursor: pointer;
             transition: all 0.3s ease;
             text-decoration: none;
-
         }
-
-        /* .add-order-button:hover {
-
-        } */
 
         .log-out-button {
             margin: 20px;
@@ -167,20 +203,47 @@
             z-index: 100;
         }
 
+        /* Alert styles */
+        .alert {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 25px;
+            border-radius: 5px;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            z-index: 1000;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+
+        .alert.success {
+            background-color: #28a745;
+        }
+
+        .alert.error {
+            background-color: #dc3545;
+        }
+
+        /* Loading indicator */
+        #loadingIndicator {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 10px;
+            background-color: #3498db;
+            color: white;
+            text-align: center;
+            z-index: 1000;
+            display: none;
+        }
+
+        
     </style>
 </head>
-<script>
-    // Check if user is logged in
-    if(!localStorage.getItem('isLoggedIn')) {
-        window.location.href = 'Sign_In_Page.html'; // Redirect to sign-in if not logged in
-    }
-    
-    // Log out functionality
-    document.querySelector('.log-out-button').addEventListener('click', function() {
-        localStorage.removeItem('isLoggedIn');
-        window.location.href = 'Sign_In_Page.html';
-    });
-</script>
 <body>
     <div class="header-container">
         <img src="images/bubbles.png" alt="Company Logo" class="header-image">
@@ -188,166 +251,394 @@
     </div>
 
     <div class="add-order-container">
-        <a href="New_Order_Page.html"><button class="add-order-button">+ Add New Order</button></a>
+        <button class="add-order-button" onclick="window.location.href='New_Order_Page.html'">+ Add New Order</button>
     </div>
 
-     <a href="Sign_In_Page.html" class="log-out-button"> log out</a>
-     <a href="Order_History_Page.html" class="order-history-button">Order History</a>
-     <a href="Sales_Tracker_Page.html" class="order-sales-button"> Order Sales</a>
+    <a href="Sign_In_Page.html" class="log-out-button">Log Out</a>
+    <a href="Order_History_Page.html" class="order-history-button">Order History</a>
+    <a href="Sales_Tracker_Page.html" class="order-sales-button">Order Sales</a>
 
     <div class="container">
-    <table>
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Name of Customer</th>
-                <th>Order ID</th>
-                <th>Payment Status</th>
-                <th>Order Status</th>
-                <th>Retrieval Status</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>1/2/2025</td>
-                <td>Bob Marley</td>
-                <td>#001</td>
-                <td>
-                    <select>
-                        <option selected>Not yet Paid</option>
-                        <option>Paid</option>
-                    </select>
-                </td>
-                <td>
-                    <select>
-                        <option selected>Done</option>
-                        <option>In Progress</option>
-                        <option>Not Started</option>
-                    </select>
-                </td>
-                <td>
-                    <select>
-                        <option selected>To be Claimed</option>
-                        <option>To be Delivered</option>
-                        <option>Claimed</option>
-                        <option selected>Delivered</option>
-                    </select>
-                </td>
-                <td>
-                    <button class="action-btn">Save</button>
-                    <button class="action-btn">Delete</button>
-                </td>
-            </tr>
-            <tr>
-                <td>1/2/2025</td>
-                <td>Bob Marley</td>
-                <td>#001</td>
-                <td>
-                    <select>
-                        <option>Not yet Paid</option>
-                        <option selected>Paid</option>
-                    </select>
-                </td>
-                <td>
-                    <select>
-                        <option>Done</option>
-                        <option selected>In Progress</option>
-                        <option>Not Started</option>
-                    </select>
-                </td>
-                <td>
-                    <select>
-                        <option>To be Claimed</option>
-                        <option selected>To be Delivered</option>
-                        <option>Claimed</option>
-                        <option selected>Delivered</option>
-                    </select>
-                </td>
-                <td>
-                    <button class="action-btn">Save</button>
-                    <button class="action-btn">Delete</button>
-                </td>
-            </tr>
-            <tr>
-                <td>1/2/2025</td>
-                <td>Bob Marley</td>
-                <td>#001</td>
-                <td>
-                    <select>
-                        <option>Not yet Paid</option>
-                        <option selected>Paid</option>
-                    </select>
-                </td>
-                <td>
-                    <select>
-                        <option>Done</option>
-                        <option>In Progress</option>
-                        <option selected>Not Started</option>
-                    </select>
-                </td>
-                <td>
-                    <select>
-                        <option>To be Claimed</option>
-                        <option selected>To be Delivered</option>
-                        <option>Claimed</option>
-                        <option selected>Delivered</option>
+        <table id="ordersTable">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Name of Customer</th>
+                    <th>Order ID</th>
+                    <th>Payment Status</th>
+                    <th>Order Status</th>
+                    <th>Retrieval Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="ordersTableBody">
+                <!-- Orders will be populated here by JavaScript -->
+            </tbody>
+        </table>
+    </div>
 
-                    </select>
-                </td>
-                <td>
-                    <button class="action-btn">Save</button>
-                    <button class="action-btn">Delete</button>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-</div>
     <script>
-        // Basic button functionality
-        document.querySelectorAll('.action-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                if (e.target.textContent === 'Delete') {
-                    if (confirm('Delete this order?')) {
-                        e.target.closest('tr').remove();
+        // Check authentication and role
+        if (!localStorage.getItem('isLoggedIn')) {
+            window.location.href = 'Sign_In_Page.html';
+        }
+
+        // For Sales Tracker Page only - restrict staff access
+        if (window.location.pathname.includes('Sales_Tracker_Page.html') && 
+            localStorage.getItem('userRole') === 'staff') {
+            alert('You do not have permission to access this page');
+            window.location.href = 'Order_Tracker_Page.html';
+        }
+
+        // Check authentication
+        if (!localStorage.getItem('isLoggedIn')) {
+            window.location.href = 'Sign_In_Page.html';
+        }
+
+        // DOM Ready Handler
+        document.addEventListener('DOMContentLoaded', function() {
+            loadOrders();
+            setupEventListeners();
+        });
+
+        // Load orders from server
+        async function loadOrders() {
+            try {
+                showLoading(true);
+                const response = await fetch('get_orders.php?cache=' + Date.now());
+                
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+
+                const result = await response.json();
+                console.log('API Response:', result);
+
+                const tbody = document.getElementById('ordersTableBody');
+                if (!tbody) throw new Error('Could not find orders table body');
+                
+                tbody.innerHTML = '';
+
+                if (!result.success) throw new Error(result.error || 'Server error');
+                if (!Array.isArray(result.orders)) throw new Error('Invalid orders format');
+
+                if (result.orders.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="7" class="no-orders">No active orders found</td></tr>`;
+                    return;
+                }
+
+                result.orders.forEach(order => {
+                    if (order.is_completed) return; // Skip completed orders
+                    
+                    const row = document.createElement('tr');
+                    row.dataset.orderId = order.order_id;
+                    
+                    row.innerHTML = `
+                        <td>${order.order_date}</td>
+                        <td>${order.name}</td>
+                        <td>${order.order_reference}</td>
+                        <td>${createStatusSelect('payment', order)}</td>
+                        <td>${createStatusSelect('order', order)}</td>
+                        <td>${createStatusSelect('retrieval', order)}</td>
+                        <td>
+                            <button class="action-btn save-btn" data-order-id="${order.order_id}">Save</button>
+                            <button class="action-btn delete-btn" data-order-id="${order.order_id}">Delete</button>
+                        </td>`;
+                    
+                    tbody.appendChild(row);
+                });
+
+                updateAllSelectStyles();
+
+            } catch (error) {
+                console.error('Load Error:', error);
+                showError(error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Create status select dropdown
+        function createStatusSelect(type, order) {
+            const maps = {
+                payment: {
+                    class: 'payment-status',
+                    options: ['Not yet Paid', 'Paid'],
+                    current: order.payment_status
+                },
+                order: {
+                    class: 'order-status',
+                    options: ['Not Started', 'In Progress', 'Done'],
+                    current: order.order_status
+                },
+                retrieval: {
+                    class: 'retrieval-status',
+                    options: ['To be Claimed', 'To be Delivered', 'Claimed', 'Delivered'],
+                    current: order.retrieval_status
+                }
+            };
+
+            const config = maps[type];
+            let html = `<select class="${config.class}" data-order-id="${order.order_id}">`;
+            
+            config.options.forEach(opt => {
+                html += `<option value="${opt}" ${opt === config.current ? 'selected' : ''}>${opt}</option>`;
+            });
+            
+            return html + '</select>';
+        }
+
+        // Update select element styling
+        function updateAllSelectStyles() {
+            const statusClasses = {
+                payment: {
+                    'Not yet Paid': 'not-paid',
+                    'Paid': 'paid'
+                },
+                order: {
+                    'Not Started': 'not-started',
+                    'In Progress': 'in-progress',
+                    'Done': 'done'
+                },
+                retrieval: {
+                    'To be Claimed': 'to-be-claimed',
+                    'To be Delivered': 'to-be-delivered',
+                    'Claimed': 'claimed',
+                    'Delivered': 'delivered'
+                }
+            };
+
+            Object.keys(statusClasses).forEach(type => {
+                document.querySelectorAll(`select.${type}-status`).forEach(select => {
+                    // Reset classes while keeping base class
+                    select.className = `${type}-status`;
+                    // Add status class
+                    select.classList.add(statusClasses[type][select.value]);
+                });
+            });
+        }
+
+        // Save order handler
+        async function saveOrder(orderId, row) {
+            try {
+                // Get current values
+                const paymentStatus = row.querySelector('.payment-status').value;
+                const orderStatus = row.querySelector('.order-status').value;
+                const retrievalStatus = row.querySelector('.retrieval-status').value;
+
+                // Update order
+                const response = await fetch('update_order.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        orderId: orderId,
+                        payment_status: paymentStatus,
+                        order_status: orderStatus,
+                        retrieval_status: retrievalStatus
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (!result.success) throw new Error(result.error || 'Save failed');
+
+                if (result.isCompleted) {
+                    // Animate removal
+                    row.style.transition = 'all 0.3s ease';
+                    row.style.opacity = '0';
+                    row.style.height = '0';
+                    row.style.padding = '0';
+                    row.style.margin = '0';
+                    row.style.border = 'none';
+                    
+                    setTimeout(() => {
+                        row.remove();
+                        showAlert('Order completed and moved to history!', 'success');
+                        
+                        // Check if table is empty after removal
+                        const tbody = document.getElementById('ordersTableBody');
+                        if (tbody && tbody.rows.length === 0) {
+                            tbody.innerHTML = `<tr><td colspan="7" class="no-orders">No active orders found</td></tr>`;
+                        }
+                    }, 300);
+                } else {
+                    showAlert('Changes saved', 'success');
+                    updateAllSelectStyles();
+                }
+
+            } catch (error) {
+                console.error('Save Error:', error);
+                showAlert(error.message, 'error');
+                throw error;
+            }
+        }
+
+        // Delete order handler
+        async function deleteOrder(orderId, row) {
+            if (!confirm('Are you sure you want to delete this order? This action cannot be undone.')) return;
+            
+            const btn = row.querySelector('.delete-btn');
+            btn.disabled = true;
+            btn.textContent = 'Deleting...';
+
+            try {
+                const response = await fetch('delete_order.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ order_id: orderId })
+                });
+
+                const result = await response.json();
+                
+                if (!result.success) {
+                    throw new Error(result.error || 'Delete failed');
+                }
+                
+                // Animate removal
+                row.style.transition = 'all 0.3s ease';
+                row.style.opacity = '0';
+                setTimeout(() => {
+                    row.remove();
+                    showAlert('Order deleted successfully', 'success');
+                    
+                    // Check if table is empty
+                    const tbody = document.querySelector('tbody');
+                    if (tbody.rows.length === 0) {
+                        tbody.innerHTML = `
+                            <tr>
+                                <td colspan="8" style="text-align: center; padding: 20px;">
+                                    No orders found
+                                </td>
+                            </tr>`;
                     }
-                } else if (e.target.textContent === 'Save') {
-                    alert('Changes saved! (In a real app, this would update the database)');
-                } else if (e.target.textContent.includes('Add')) {
-                    alert('Add order form would appear here');
+                }, 300);
+            } catch (error) {
+                console.error('Delete Error:', error);
+                showAlert(error.message, 'error');
+                
+                if (error.message.includes('foreign key constraint')) {
+                    showAlert('Cannot delete order with existing items', 'error');
+                }
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Delete';
+            }
+        }
+
+        // In your Order Tracker and History pages
+        document.addEventListener('DOMContentLoaded', function() {
+            if (localStorage.getItem('userRole') === 'staff') {
+                const salesButton = document.querySelector('.order-sales-button');
+                if (salesButton) salesButton.style.display = 'none';
+            }
+        });
+
+        // Event Listeners
+        function setupEventListeners() {
+            // Save button
+            document.addEventListener('click', async function(e) {
+                if (e.target.classList.contains('save-btn')) {
+                    const btn = e.target;
+                    const orderId = btn.dataset.orderId;
+                    const row = btn.closest('tr');
+                    
+                    if (!row) {
+                        showAlert('Order row not found', 'error');
+                        return;
+                    }
+
+                    btn.disabled = true;
+                    btn.textContent = 'Saving...';
+
+                    try {
+                        await saveOrder(orderId, row);
+                    } catch (error) {
+                        // Error already handled in saveOrder
+                    } finally {
+                        btn.disabled = false;
+                        btn.textContent = 'Save';
+                    }
+                }
+                
+                // Delete button
+                if (e.target.classList.contains('delete-btn')) {
+                    if (!confirm('Are you sure you want to delete this order? This action cannot be undone.')) return;
+                    
+                    const btn = e.target;
+                    const orderId = btn.dataset.orderId;
+                    const row = btn.closest('tr');
+                    
+                    btn.disabled = true;
+                    btn.textContent = 'Deleting...';
+
+                    try {
+                        await deleteOrder(orderId, row);
+                    } catch (error) {
+                        showAlert(error.message, 'error');
+                    } finally {
+                        btn.disabled = false;
+                        btn.textContent = 'Delete';
+                    }
                 }
             });
-        });
 
-        function updateSelectStyle(select) {
-        const value = select.value;
-
-        select.style.backgroundColor = "";
-
-        if (value === "Paid" || value === "Done") {
-        select.style.backgroundColor = "#d4edda"; 
-        } else if (value === "Not yet Paid" || value === "Not Started") {
-        select.style.backgroundColor = "#f8d7da";
-        } else if (value === "In Progress") {
-        select.style.backgroundColor = "#ADD8E6";
-        } else if (value === "To be Claimed" || value === "To be Delivered") {
-        select.style.backgroundColor = "#fff3cd"; 
-        } else if (value === "Claimed" || value === "Delivered") {
-        select.style.backgroundColor = "#d4edda"; 
-        }
+            // Logout button
+            document.querySelector('.log-out-button')?.addEventListener('click', function() {
+                localStorage.removeItem('isLoggedIn');
+                window.location.href = 'Sign_In_Page.html';
+            });
         }
 
+        // UI Helpers
+        function showLoading(show) {
+            const loader = document.getElementById('loadingIndicator') || createLoader();
+            loader.style.display = show ? 'block' : 'none';
+            
+            function createLoader() {
+                const div = document.createElement('div');
+                div.id = 'loadingIndicator';
+                div.style.position = 'fixed';
+                div.style.top = '0';
+                div.style.left = '0';
+                div.style.right = '0';
+                div.style.padding = '10px';
+                div.style.backgroundColor = '#3498db';
+                div.style.color = 'white';
+                div.style.textAlign = 'center';
+                div.style.zIndex = '1000';
+                div.textContent = 'Loading...';
+                document.body.appendChild(div);
+                return div;
+            }
+        }
 
-    document.querySelectorAll('select').forEach(select => {
-        updateSelectStyle(select); 
-        
-        select.addEventListener('change', function () {
-            updateSelectStyle(this);
-        });
-    });
+        function showAlert(message, type) {
+            // Remove existing alerts
+            document.querySelectorAll('.alert').forEach(el => el.remove());
+            
+            const alert = document.createElement('div');
+            alert.className = `alert ${type}`;
+            alert.textContent = message;
+            document.body.appendChild(alert);
+            
+            setTimeout(() => {
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 300);
+            }, 3000);
+        }
 
-
-        
+        function showError(message) {
+            const tbody = document.getElementById('ordersTableBody');
+            if (tbody) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="error-message">
+                            Error: ${message}<br>
+                            <button onclick="location.reload()">Reload Page</button>
+                        </td>
+                    </tr>`;
+            } else {
+                alert('Error: ' + message);
+            }
+        }
     </script>
 </body>
 </html>

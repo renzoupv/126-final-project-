@@ -1,156 +1,585 @@
 <!DOCTYPE html>
-<style>
-    body {
-        font-family: 'Arial', sans-serif;
-        margin: 0;
-        padding: 30px;
-        background-color: #6DB7DB;
-        color: #333;
-        position: relative;
-    }
-    .header-container {
-        display: flex;
-        justify-content: flex-start;
-        align-items: center;
-        margin: 30px 0;
-        position: relative;
-    }
-    .page-header {
-        color: white;
-        font-size: 90px;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-        font-weight: 600;
-        margin: 0;
-        margin-left: 140px;
-    }
-    .header-image {
-        width: 270px;
-        height: 270px;
-        top: 10px;
-        transform: translate(-50%, -50%) rotate(80deg);
-        object-fit: contain;
-        position: absolute;
-        left: 120vh;
-        filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.2));
-    }
-    .container {
-        background-color: white;
-        border-radius: 10px;
-        padding: 30px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-        width: 90%;
-        max-width: 1500px;
-        margin: 0 auto 20px auto;
-        min-height: 80vh;
-    }
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 25px;
-        font-size: 1.05rem;
-    }
-    th, td {
-        border: 1px solid #ddd;
-        padding: 15px;
-        text-align: left;
-    }
-    th {
-        background-color: #3498db;
-        color: white;
-        font-size: 1.1rem;
-        padding: 18px 15px;
-    }
-    tr:nth-child(even) {
-        background-color: #f8f8f8;
-    }
-    tr:hover {
-        background-color: #e6f7ff;
-    }
-    .back-button {
-        position: absolute;
-        top: 40px;
-        right: 40px;
-        padding: 12px 24px;
-        background-color: transparent;
-        color: white;
-        border: 2px solid white;
-        border-radius: 5px;
-        font-size: 1rem;
-        font-weight: bold;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        text-decoration: none;
-        z-index: 100;
-    }
-    .back-button:hover {
-        background-color: rgba(255, 255, 255, 0.1);
-        transform: translateY(-2px);
-    }
-</Style>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sales Tracker</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 30px;
+            background-color: #6DB7DB;
+            color: #333;
+            position: relative;
+        }
+        .header-container {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            margin: 30px 0;
+            position: relative;
+        }
+        .page-header {
+            color: white;
+            font-size: 90px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            font-weight: 600;
+            margin: 0;
+            margin-left: 140px;
+        }
+        .header-image {
+            width: 270px;
+            height: 270px;
+            top: 10px;
+            transform: translate(-50%, -50%) rotate(80deg);
+            object-fit: contain;
+            position: absolute;
+            left: 120vh;
+            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.2));
+        }
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            width: 90%;
+            max-width: 1500px;
+            margin: 0 auto 20px auto;
+            min-height: 80vh;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 25px;
+            font-size: 1.05rem;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 15px;
+            text-align: left;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+            font-size: 1.1rem;
+            padding: 18px 15px;
+        }
+        tr:nth-child(even) {
+            background-color: #f8f8f8;
+        }
+        tr:hover {
+            background-color: #e6f7ff;
+        }
+        .back-button {
+            position: absolute;
+            top: 40px;
+            right: 40px;
+            padding: 12px 24px;
+            background-color: transparent;
+            color: white;
+            border: 2px solid white;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            z-index: 100;
+        }
+        .back-button:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+        .action-btn {
+            margin: 2px;
+            padding: 6px 12px;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+        .delete-btn {
+            background-color: #dc3545;
+            color: white;
+        }
+        .delete-btn:hover {
+            background-color: #c82333;
+        }
+        .action-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .alert {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 25px;
+            border-radius: 5px;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            z-index: 1000;
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+        .alert.success {
+            background-color: #28a745;
+        }
+        .alert.error {
+            background-color: #dc3545;
+        }
+        .loading {
+            display: inline-block;
+            margin-left: 10px;
+        }
+        .filters-container {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: flex-end;
+        }
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .filter-group label {
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #495057;
+        }
+        .filter-group input {
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+        }
+        .filter-button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .filter-button:hover {
+            background-color: #2980b9;
+        }
+        .summary-container {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        .summary-item {
+            margin: 5px 0;
+        }
+        .summary-value {
+            font-weight: bold;
+            color: #28a745;
+        }
+        .reset-filters {
+            background-color: #6c757d;
+            margin-left: 10px;
+        }
+        .reset-filters:hover {
+            background-color: #5a6268;
+        }
+        /* Transition effects */
+        tr {
+            transition: all 0.3s ease;
+        }
+        .fade-out {
+            opacity: 0;
+            height: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+            margin-top: 0;
+            margin-bottom: 0;
+            border-top-width: 0;
+            border-bottom-width: 0;
+            overflow: hidden;
+        }
+        /* Add-ons styles */
+        .addons-list {
+            font-size: 0.9em;
+            color: #555;
+        }
+        .addon-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 3px;
+        }
+        .addon-name {
+            font-weight: 500;
+        }
+        .addon-price {
+            font-weight: bold;
+        }
+        .addons-total {
+            margin-top: 5px;
+            padding-top: 5px;
+            border-top: 1px dashed #ccc;
+            font-weight: bold;
+        }
+        /* Weight price style */
+        .weight-price {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+    </style>
 </head>
 <body>
-    <a href="Order_Tracker_Page.html" class="back-button"> back</a>
+    <a href="Order_Tracker_Page.html" class="back-button">Back</a>
     
     <div class="header-container">
-        <img src="bubbles.png" alt="Company Logo" class="header-image">
+        <img src="images/bubbles.png" alt="Company Logo" class="header-image">
         <h1 class="page-header">SALES TRACKER</h1>
     </div>
     
     <div class="container">
-        <table>
+        <!-- Filters Section -->
+        <div class="filters-container">
+            <div class="filter-group">
+                <label for="startDate">From Date</label>
+                <input type="date" id="startDate">
+            </div>
+            
+            <div class="filter-group">
+                <label for="endDate">To Date</label>
+                <input type="date" id="endDate">
+            </div>
+            
+            <button class="filter-button" id="applyFilters">Apply Filter</button>
+            <button class="filter-button reset-filters" id="resetFilters">Reset</button>
+        </div>
+        
+        <!-- Sales Table with Add-Ons and Weight Price Columns -->
+        <table id="salesTable">
             <thead>
                 <tr>
                     <th>Date</th>
-                    <th>Name of Customer</th>
+                    <th>Customer</th>
                     <th>Order ID</th>
-                    <th>Order Weight</th>
+                    <th>Weight (kg)</th>
+                    <th>Weight Price</th>
+                    <th>Add-Ons</th>
                     <th>Amount</th>
                     <th>Delivery Fee</th>
-                    <th>Total Amount</th>
+                    <th>Total</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="salesTableBody">
                 <tr>
-                    <td>1/2/2025</td>
-                    <td>Bob Marley</td>
-                    <td>#001</td>
-                    <td>12 kg</td>
-                    <td>150 php</td>
-                    <td>-</td>
-                    <td>150 php</td>
-                </tr>
-                <tr>
-                    <td>1/2/2025</td>
-                    <td>Bob Marley</td>
-                    <td>#001</td>
-                    <td>8 kg</td>
-                    <td>120 php</td>
-                    <td>35 php</td>
-                    <td>155 php</td>
-                </tr>
-                <tr>
-                    <td>1/2/2025</td>
-                    <td>Bob Marley</td>
-                    <td>#001</td>
-                    <td>12 kg</td>
-                    <td>150 php</td>
-                    <td>35 php</td>
-                    <td>185 php</td>
+                    <td colspan="10" style="text-align: center;">Loading sales data...</td>
                 </tr>
             </tbody>
         </table>
+        
+        <!-- Summary Section -->
+        <div class="summary-container">
+            <div class="summary-item">
+                Total Orders: <span class="summary-value" id="totalOrders">0</span>
+            </div>
+            <div class="summary-item">
+                Total Weight: <span class="summary-value" id="totalWeight">0 kg</span>
+            </div>
+            <div class="summary-item">
+                Weight Price Total: <span class="summary-value" id="totalWeightPrice">₱0.00</span>
+            </div>
+            <div class="summary-item">
+                Add-Ons Total: <span class="summary-value" id="totalAddons">₱0.00</span>
+            </div>
+            <div class="summary-item">
+                Total Sales: <span class="summary-value" id="totalSales">₱0.00</span>
+            </div>
+        </div>
     </div>
 
     <script>
-        // JavaScript to handle the back button functionality
-        document.querySelector('.back-button').addEventListener('click', function(e) {
-            e.preventDefault();
-            window.history.back();
+        // Check authentication
+        if (!localStorage.getItem('isLoggedIn')) {
+            window.location.href = 'Sign_In_Page.html';
+        }
+
+        // For Sales Tracker Page only - restrict staff access
+        if (localStorage.getItem('userRole') === 'staff') {
+            alert('You do not have permission to access this page');
+            window.location.href = 'Order_Tracker_Page.html';
+        }
+
+        let allSalesData = [];
+        
+        function showLoading(show) {
+            const loader = document.getElementById('loadingIndicator');
+            if (show) {
+                if (!loader) {
+                    const div = document.createElement('div');
+                    div.id = 'loadingIndicator';
+                    div.style.position = 'fixed';
+                    div.style.top = '0';
+                    div.style.left = '0';
+                    div.style.right = '0';
+                    div.style.padding = '10px';
+                    div.style.backgroundColor = '#3498db';
+                    div.style.color = 'white';
+                    div.style.textAlign = 'center';
+                    div.style.zIndex = '1000';
+                    div.textContent = 'Loading...';
+                    document.body.appendChild(div);
+                } else {
+                    loader.style.display = 'block';
+                }
+            } else if (loader) {
+                loader.style.display = 'none';
+            }
+        }
+
+        function showAlert(message, type) {
+            document.querySelectorAll('.alert').forEach(el => el.remove());
+            
+            const alert = document.createElement('div');
+            alert.className = `alert ${type}`;
+            alert.textContent = message;
+            document.body.appendChild(alert);
+            
+            setTimeout(() => {
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 300);
+            }, 3000);
+        }
+
+        function formatAddons(addons) {
+            if (!addons || addons.length === 0) {
+                return '<div class="addons-list">No add-ons</div>';
+            }
+
+            let html = '<div class="addons-list">';
+            let total = 0;
+            
+            addons.forEach(addon => {
+                const itemTotal = addon.price * addon.quantity;
+                total += itemTotal;
+                html += `
+                    <div class="addon-item">
+                        <span class="addon-name">${addon.quantity}x ${addon.name}</span>
+                        <span class="addon-price">₱${itemTotal.toFixed(2)}</span>
+                    </div>
+                `;
+            });
+
+            html += `
+                <div class="addons-total">
+                    <span>Add-Ons Total:</span>
+                    <span>₱${total.toFixed(2)}</span>
+                </div>
+            </div>`;
+
+            return html;
+        }
+
+        function setupEventListeners() {
+            document.addEventListener('click', async function(e) {
+                if (e.target.classList.contains('delete-btn')) {
+                    const orderId = e.target.dataset.orderId;
+                    if (confirm('Are you sure you want to delete this sale record? This action cannot be undone.')) {
+                        try {
+                            e.target.disabled = true;
+                            e.target.innerHTML = 'Deleting <span class="loading">...</span>';
+                            
+                            const response = await fetch('delete_sale.php', {
+                                method: 'POST',
+                                headers: {'Content-Type': 'application/json'},
+                                body: JSON.stringify({order_id: orderId})
+                            });
+                            
+                            const result = await response.json();
+                            if (!result.success) {
+                                throw new Error(result.error || 'Delete failed');
+                            }
+                            
+                            const row = e.target.closest('tr');
+                            row.classList.add('fade-out');
+                            
+                            setTimeout(() => {
+                                row.remove();
+                                showAlert('Sale record deleted successfully', 'success');
+                                
+                                allSalesData = allSalesData.filter(item => item.order_id != orderId);
+                                applyFilters();
+                                
+                                const tbody = document.getElementById('salesTableBody');
+                                if (tbody.rows.length === 0) {
+                                    tbody.innerHTML = `
+                                        <tr>
+                                            <td colspan="10" style="text-align: center; padding: 20px;">
+                                                No completed orders found
+                                            </td>
+                                        </tr>`;
+                                }
+                            }, 300);
+                            
+                        } catch (error) {
+                            console.error('Delete failed:', error);
+                            showAlert(error.message, 'error');
+                            e.target.disabled = false;
+                            e.target.textContent = 'Delete';
+                        }
+                    }
+                }
+            });
+        }
+
+        function applyCurrentFilters(item) {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            if (startDate) {
+                const itemDate = new Date(item.date);
+                const filterStartDate = new Date(startDate);
+                if (itemDate < filterStartDate) return false;
+            }
+            
+            if (endDate) {
+                const itemDate = new Date(item.date);
+                const filterEndDate = new Date(endDate);
+                filterEndDate.setDate(filterEndDate.getDate() + 1);
+                if (itemDate >= filterEndDate) return false;
+            }
+            
+            return true;
+        }
+
+        function applyFilters() {
+            const filteredData = allSalesData.filter(applyCurrentFilters);
+            displaySalesData(filteredData);
+            updateSummary(filteredData);
+        }
+
+        function resetFilters() {
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
+            applyFilters();
+        }
+
+        function calculateWeightPrice(weight, amount, addons) {
+            // Calculate base laundry price (amount minus addons)
+            const addonsTotal = calculateAddonsTotal({addons: addons || []});
+            const basePrice = amount - addonsTotal;
+            return basePrice;
+        }
+
+        function calculateAddonsTotal(order) {
+            if (!order.addons || order.addons.length === 0) return 0;
+            return order.addons.reduce((sum, addon) => sum + (addon.price * addon.quantity), 0);
+        }
+
+        function displaySalesData(data) {
+            const tbody = document.getElementById('salesTableBody');
+            tbody.innerHTML = '';
+            
+            if (data.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="10" style="text-align: center; padding: 20px;">
+                            No sales records found for selected filters
+                        </td>
+                    </tr>`;
+                return;
+            }
+            
+            data.forEach(order => {
+                const weightPrice = calculateWeightPrice(order.weight, order.amount, order.addons);
+                
+                const row = document.createElement('tr');
+                row.dataset.orderId = order.order_id;
+                row.innerHTML = `
+                    <td>${order.date}</td>
+                    <td>${order.customer}</td>
+                    <td>${order.order_reference}</td>
+                    <td>${order.weight}</td>
+                    <td class="weight-price">₱${weightPrice.toFixed(2)}</td>
+                    <td>${formatAddons(order.addons)}</td>
+                    <td>₱${order.amount.toFixed(2)}</td>
+                    <td>${order.delivery_fee ? '₱'+order.delivery_fee.toFixed(2) : '-'}</td>
+                    <td>₱${order.total.toFixed(2)}</td>
+                    <td>
+                        <button class="action-btn delete-btn" data-order-id="${order.order_id}">Delete</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            setupEventListeners();
+        }
+
+        function updateSummary(data) {
+            const totalOrders = data.length;
+            const totalWeight = data.reduce((sum, item) => sum + parseFloat(item.weight), 0);
+            const totalWeightPrice = data.reduce((sum, item) => {
+                return sum + calculateWeightPrice(item.weight, item.amount, item.addons);
+            }, 0);
+            const totalAddons = data.reduce((sum, item) => sum + calculateAddonsTotal(item), 0);
+            const totalSales = data.reduce((sum, item) => sum + parseFloat(item.total), 0);
+            
+            document.getElementById('totalOrders').textContent = totalOrders;
+            document.getElementById('totalWeight').textContent = `${totalWeight.toFixed(2)} kg`;
+            document.getElementById('totalWeightPrice').textContent = `₱${totalWeightPrice.toFixed(2)}`;
+            document.getElementById('totalAddons').textContent = `₱${totalAddons.toFixed(2)}`;
+            document.getElementById('totalSales').textContent = `₱${totalSales.toFixed(2)}`;
+        }
+
+        async function loadSales() {
+            try {
+                showLoading(true);
+                const response = await fetch('get_sales.php?t=' + Date.now());
+                const result = await response.json();
+                
+                if (!result.success) {
+                    throw new Error(result.error || 'Failed to load sales data');
+                }
+                
+                allSalesData = result.sales || [];
+                
+                // Set default dates to current month if not set
+                if (!document.getElementById('startDate').value) {
+                    const today = new Date();
+                    const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+                    document.getElementById('startDate').valueAsDate = firstDay;
+                    document.getElementById('endDate').valueAsDate = today;
+                }
+                
+                applyFilters();
+                
+            } catch (error) {
+                console.error('Error loading sales:', error);
+                document.getElementById('salesTableBody').innerHTML = `
+                    <tr>
+                        <td colspan="10" style="text-align: center; color: red; padding: 20px;">
+                            Error loading data: ${error.message}
+                            <button onclick="loadSales()" style="margin-left: 10px;">Retry</button>
+                        </td>
+                    </tr>`;
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSales();
+            
+            document.getElementById('applyFilters').addEventListener('click', applyFilters);
+            document.getElementById('resetFilters').addEventListener('click', resetFilters);
         });
     </script>
 </body>

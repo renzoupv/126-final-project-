@@ -108,13 +108,13 @@
 
         input[type="text"],
         select {
-            width: 50%;
+            width: 100%;
             padding: 10px;
             margin-bottom: 25px;
             border: 1px solid #ccc;
             border-radius: 5px;
+            box-sizing: border-box;
         }
-
 
         .addons table {
             width: 100%;
@@ -175,6 +175,11 @@
             background-color: #0077aa;
         }
 
+        #location-container {
+            display: none;
+            margin-bottom: 25px;
+        }
+
         /* Responsive stacking for smaller screens */
         @media (max-width: 768px) {
             .order-form {
@@ -188,84 +193,92 @@
     </style>
 </head>
 <body>
-    <a href="#" class="back-button"> back</a>
+    <a href="#" class="back-button">Back</a>
     
     <div class="header-container">
-        <img src="bubbles.png" alt="Company Logo" class="header-image">
+        <img src="images/bubbles.png" alt="Laundry Company Logo" class="header-image">
         <h1 class="page-header">New Order</h1>
     </div>
     
     <div class="container">
-        <form class="order-form">
+        <form class="order-form" id="orderForm">
             <div class="form-section">
-            <label>Name:</label>
-            <input type="text" placeholder="Value">
+                <label for="customerName">Name:</label>
+                <input type="text" id="customerName" name="customerName" placeholder="Customer Name" required>
 
-            <label>Contact No.:</label>
-            <input type="text" placeholder="Value">
+                <label for="contactNumber">Contact No.:</label>
+                <input type="text" id="contactNumber" name="contactNumber" placeholder="Contact Number" required>
 
-            <label>Pickup/Delivery</label>
-            <select >
-                <option>Value</option>
-            </select>
+                <label for="deliveryType">Pickup/Delivery</label>
+                <select id="deliveryType" name="deliveryType">
+                    <option value="Pickup">Pickup</option>
+                    <option value="Delivery">Delivery</option>
+                </select>
 
-            <label>For delivery, pick a location:</label>
-            <select>
-                <option>Current location:</option>
-            </select>
+                <div id="location-container">
+                    <label for="location">For delivery, enter location:</label>
+                    <input type="text" id="location" name="location" placeholder="Location">
+                </div>
             </div>
 
             <div class="form-section">
-            <label>Order Weight</label>
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <button type="button" id="weight-decrease" class="qty-btn">-</button>
-                <span id="order-weight">8</span> kg
-                <button type="button" id="weight-increase" class="qty-btn">+</button>
-            </div>
+                <label>Order Weight</label>
+                <div id="order-weight-controls" aria-labelledby="order-weight-display" style="display: flex; align-items: center; gap: 10px;">
+                    <button type="button" id="weight-decrease" class="qty-btn" aria-label="Decrease weight">-</button>
+                    <span id="order-weight">8</span> kg
+                    <button type="button" id="weight-increase" class="qty-btn" aria-label="Increase weight">+</button>
+                </div>
 
-            <div class="addons">
-                <table>
-                    <th>Add Ons</th>
-                    <th>Price</th>
-                    <th>Quantity</th>
-                    <tr>
-                        <td>Towels</td>
-                        <td>P30</td>
-                        <td>
-                            <button type="button" class="qty-btn" data-action="decrease">-</button>
-                            <span class="qty-value">0</span>
-                            <button type="button" class="qty-btn" data-action="increase">+</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Bedsheets/ Pillowcases</td>
-                        <td>P50</td>
-                        <td>
-                            <button type="button" class="qty-btn" data-action="decrease">-</button>
-                            <span class="qty-value">0</span>
-                            <button type="button" class="qty-btn" data-action="increase">+</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Comforters</td>
-                        <td>P75</td>
-                        <td>
-                            <button type="button" class="qty-btn" data-action="decrease">-</button>
-                            <span class="qty-value">0</span>
-                            <button type="button" class="qty-btn" data-action="increase">+</button>
-                        </td>
-                    </tr>
-                </table>
-            </div>
+                <div class="addons">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th scope="col">Add Ons</th>
+                                <th scope="col">Price</th>
+                                <th scope="col">Quantity</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Towels</td>
+                                <td>P30</td>
+                                <td>
+                                    <button type="button" class="qty-btn" data-action="decrease" aria-label="Decrease towel quantity">-</button>
+                                    <span class="qty-value">0</span>
+                                    <button type="button" class="qty-btn" data-action="increase" aria-label="Increase towel quantity">+</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Bedsheets/Pillowcases</td>
+                                <td>P50</td>
+                                <td>
+                                    <button type="button" class="qty-btn" data-action="decrease" aria-label="Decrease bedsheets quantity">-</button>
+                                    <span class="qty-value">0</span>
+                                    <button type="button" class="qty-btn" data-action="increase" aria-label="Increase bedsheets quantity">+</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Comforters</td>
+                                <td>P75</td>
+                                <td>
+                                    <button type="button" class="qty-btn" data-action="decrease" aria-label="Decrease comforter quantity">-</button>
+                                    <span class="qty-value">0</span>
+                                    <button type="button" class="qty-btn" data-action="increase" aria-label="Increase comforter quantity">+</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
 
-            <div class="summary">
-                <p>Sub Total: <span id="subtotal">PHP 0.00</span></p>
-                <p>PHP 50+ Delivery fee</p>
-                <p>Total Amount: <strong id="total">PHP 0.00</strong></p>
-            </div>
+                <div class="summary">
+                    <p>Sub Total: <span id="subtotal">PHP 0.00</span></p>
+                    <p id="delivery-fee-text">PHP 50+ Delivery fee</p>
+                    <p>Total Amount: <strong id="total">PHP 0.00</strong></p>
+                </div>
 
-            <div class="form-submit">
-            <button type="submit">Submit</button>
+                <div class="form-submit">
+                    <button type="submit" id="submit-order">Submit Order</button>
+                </div>
             </div>
         </form>
     </div>
@@ -284,6 +297,10 @@
         const weightDisplay = document.getElementById('order-weight');
         const weightDecrease = document.getElementById('weight-decrease');
         const weightIncrease = document.getElementById('weight-increase');
+        const deliveryTypeSelect = document.getElementById('deliveryType');
+        const locationContainer = document.getElementById('location-container');
+        const locationInput = document.getElementById('location');
+        const deliveryFeeText = document.getElementById('delivery-fee-text');
 
         function getOrderWeight() {
             return parseInt(weightDisplay.textContent);
@@ -296,32 +313,27 @@
 
         function updateTotals() {
             let subtotal = 0;
-
-            // Weight price
             const weight = getOrderWeight();
             subtotal += calculateWeightPrice(weight);
 
-            // Add-on prices
-            const rows = document.querySelectorAll('.addons tr');
-            rows.forEach(row => {
-                const name = row.querySelector('td:first-child')?.textContent;
+            document.querySelectorAll('.addons tr').forEach(row => {
                 const priceText = row.querySelector('td:nth-child(2)')?.textContent;
                 const price = parseInt(priceText?.replace("P", "") || "0");
                 const qty = parseInt(row.querySelector('.qty-value')?.textContent || "0");
                 subtotal += price * qty;
             });
 
-            const total = subtotal + deliveryFee;
+            const isDelivery = deliveryTypeSelect.value === 'Delivery';
+            const total = isDelivery ? subtotal + deliveryFee : subtotal;
 
             document.getElementById('subtotal').textContent = `P${subtotal.toFixed(2)}`;
+            deliveryFeeText.textContent = isDelivery ? `PHP ${deliveryFee}+ Delivery fee` : 'No Delivery Fee';
             document.getElementById('total').textContent = `P${total.toFixed(2)}`;
         }
 
         // Add-on quantity button logic
-        document.querySelectorAll('.qty-btn').forEach(button => {
+        document.querySelectorAll('[data-action]').forEach(button => {
             const action = button.getAttribute('data-action');
-            if (!action) return; // Skip if no action (like weight buttons)
-
             button.addEventListener('click', () => {
                 const qtySpan = button.parentElement.querySelector('.qty-value');
                 let currentQty = parseInt(qtySpan.textContent);
@@ -354,7 +366,93 @@
             }
         });
 
-        updateTotals(); // Run on load
+        // Toggle location field based on delivery type
+        function toggleLocationField() {
+            if (deliveryTypeSelect.value === 'Delivery') {
+                locationContainer.style.display = 'block';
+                locationInput.required = true;
+            } else {
+                locationContainer.style.display = 'none';
+                locationInput.required = false;
+                locationInput.value = '';
+            }
+            updateTotals();
+        }
+
+        deliveryTypeSelect.addEventListener('change', toggleLocationField);
+
+        document.getElementById('orderForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        // Validate form
+        if (deliveryTypeSelect.value === 'Delivery' && !locationInput.value.trim()) {
+            alert('Please enter a delivery location');
+            return;
+        }
+
+        try {
+            // Get add-ons quantities
+            const addOns = [];
+            document.querySelectorAll('.addons tr').forEach(row => {
+                if (row.querySelector('th')) return; // Skip header row
+                
+                const nameCell = row.querySelector('td:first-child');
+                const qtySpan = row.querySelector('.qty-value');
+                
+                if (nameCell && qtySpan) {
+                    const name = nameCell.textContent;
+                    const qty = parseInt(qtySpan.textContent || "0");
+                    
+                    if (qty > 0) {
+                        let addonId = 1; // Towels
+                        if (name.includes("Bedsheets")) addonId = 2;
+                        if (name.includes("Comforters")) addonId = 3;
+                        
+                        addOns.push({
+                            id: addonId,
+                            quantity: qty
+                        });
+                    }
+                }
+            });
+
+            const response = await fetch('save_order.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    customerName: document.getElementById('customerName').value,
+                    contactNumber: document.getElementById('contactNumber').value,
+                    deliveryType: deliveryTypeSelect.value,
+                    location: locationInput.value,
+                    orderWeight: getOrderWeight(),
+                    totalAmount: document.getElementById('total').textContent.replace('P', ''),
+                    addons: JSON.stringify(addOns)
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            
+            if (result.success) {
+                alert(`Order ${result.orderId} created successfully!`);
+                window.location.href = 'Order_Tracker_Page.html';
+            } else {
+                alert('Error saving order: ' + (result.error || 'Unknown error'));
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Failed to submit order: ' + error.message);
+        }
+    });
+
+        // Initialize on load
+        updateTotals();
+        toggleLocationField();
     </script>
 </body>
 </html>
