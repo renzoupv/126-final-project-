@@ -159,6 +159,13 @@ function getDistanceInKm(lat1, lng1, lat2, lng2) {
   return R * c;
 }
 
+function sendDistanceMessage(lat, lng) {
+  const fixedLat = 10.647167;
+  const fixedLng = 122.232861;
+  const distance = getDistanceInKm(fixedLat, fixedLng, lat, lng);
+  window.parent.postMessage(distance.toFixed(2), '*');
+}
+
 window.addEventListener('message', function(event) {
   if (event.data?.type === 'get-address') {
     const location = getFormInputElement('location').value;
@@ -241,10 +248,14 @@ function renderAddress(place) {
     gmpMarker.addListener('dragend', () => {
       const pos = gmpMarker.getPosition();
       reverseGeocodeAndFill(pos);
+      sendDistanceMessage(pos.lat(), pos.lng()); // ✅ send distance after drag
     });
   } else {
     gmpMarker.setPosition(position);
   }
+
+  // ✅ send distance on autocomplete select
+  sendDistanceMessage(position.lat(), position.lng());
 }
 
 function reverseGeocodeAndFill(latLng) {

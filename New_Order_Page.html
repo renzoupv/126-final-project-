@@ -237,7 +237,7 @@
                     <label>Order Weight</label>
                     <div id="order-weight-controls" aria-labelledby="order-weight-display" style="display: flex; align-items: center; gap: 10px;">
                         <button type="button" id="weight-decrease" class="qty-btn" aria-label="Decrease weight">-</button>
-                        <span id="order-weight">8</span> kg
+                        <span id="order-weight">8</span> Kg
                         <button type="button" id="weight-increase" class="qty-btn" aria-label="Increase weight">+</button>
                     </div>
 
@@ -282,11 +282,12 @@
                         </table>
                     </div>
 
-                    <div class="summary">
-                        <p>Sub Total: <span id="subtotal">PHP 0.00</span></p>
-                        <p id="delivery-fee-text">PHP 50+ Delivery fee</p>
-                        <p>Total Amount: <strong id="total">PHP 0.00</strong></p>
-                    </div>
+               <div class="summary">
+                <p id="summary-base"></p>
+                <p id="summary-addons"></p>
+                <p id="delivery-fee-text"></p>
+                <p><strong id="total">Total: PHP 0.00</strong></p>
+                </div>
                 </div>
             </div>
 
@@ -305,9 +306,14 @@
         window.history.back();
     });
 
+    //let
+    let distanceRounded = 0;
+
     // Constants
     const baseWeight = 8;
     const basePrice = 150;
+    const baseDF = 20;
+    const peraddtlKMPrice = 15;
     const extraKgPrice = 20;
     const deliveryFee = 50;
 
@@ -332,29 +338,61 @@
         return price;
     }
 
-    function updateTotals() {
-        let subtotal = 0;
-        const weight = getOrderWeight();
-        subtotal += calculateWeightPrice(weight);
+function updateTotals() {
+    const weight = getOrderWeight();
+    const basePriceValue = calculateWeightPrice(weight);
 
-        document.querySelectorAll('.addons tr').forEach(row => {
-            const priceText = row.querySelector('td:nth-child(2)')?.textContent;
-            const price = parseInt(priceText?.replace("P", "") || "0");
-            const qty = parseInt(row.querySelector('.qty-value')?.textContent || "0");
-            subtotal += price * qty;
-        });
+    // Calculate add-ons subtotal
+    let addonsSubtotal = 0;
+    document.querySelectorAll('.addons tr').forEach(row => {
+        const priceText = row.querySelector('td:nth-child(2)')?.textContent;
+        const price = parseInt(priceText?.replace("P", "") || "0");
+        const qty = parseInt(row.querySelector('.qty-value')?.textContent || "0");
+        if (qty > 0) {
+            addonsSubtotal += price * qty;
+        }
+    });
 
-        const isDelivery = deliveryTypeSelect.value === 'Delivery';
-        const total = isDelivery ? subtotal + deliveryFee : subtotal;
+    const isDelivery = deliveryTypeSelect.value === 'Delivery';
 
-        console.log("Subtotal:", subtotal);
-        console.log("Delivery selected:", isDelivery);
-        console.log("Total:", total);
-
-        document.getElementById('subtotal').textContent = `P${subtotal.toFixed(2)}`;
-        deliveryFeeText.textContent = isDelivery ? `PHP ${deliveryFee}+ Delivery fee` : 'No Delivery Fee';
-        document.getElementById('total').textContent = `P${total.toFixed(2)}`;
+    // Delivery fee calculation
+    let baseDeliveryFee = 0;
+    let extraDeliveryFee = 0;
+    let extraKm = 0;
+    if (isDelivery) {
+        baseDeliveryFee = baseDF;
+        if (distanceRounded > 2) {
+            extraKm = distanceRounded - 2;
+            extraDeliveryFee = extraKm * peraddtlKMPrice;
+        }
     }
+
+    const totalDeliveryFee = baseDeliveryFee + extraDeliveryFee;
+    const total = isDelivery ? basePriceValue + addonsSubtotal + totalDeliveryFee : basePriceValue + addonsSubtotal;
+
+    // UI updates
+    document.getElementById('summary-base').innerHTML = `
+        Base Price (${weight} kg): PHP ${basePriceValue.toFixed(2)}
+    `;
+
+    document.getElementById('summary-addons').innerHTML = `
+        Add-ons Total: PHP ${addonsSubtotal.toFixed(2)}
+    `;
+
+    if (isDelivery) {
+        document.getElementById('delivery-fee-text').innerHTML = `
+            Delivery Fee: PHP ${baseDeliveryFee} (Base for 2 km)
+            ${extraKm > 0 ? `<br>+ PHP ${extraDeliveryFee.toFixed(2)} (${extraKm} km × PHP ${peraddtlKMPrice})` : ''}
+        `;
+    } else {
+        document.getElementById('delivery-fee-text').textContent = 'No Delivery Fee';
+    }
+
+    document.getElementById('total').textContent = `Total: PHP ${total.toFixed(2)}`;
+}
+
+
+
 
     // Add-on quantity buttons
     document.querySelectorAll('[data-action]').forEach(button => {
@@ -405,10 +443,22 @@
             console.log("Delivery type set to Pickup – hiding location field");
         }
         updateTotals();
-    }
-
+        }
+        
+    window.addEventListener('message', function(event) {
+    const data = event.data;
+        // Check if data is a string and represents a valid finite number
+        if (typeof data === 'string' && !isNaN(data) && isFinite(data)) {
+            distanceRounded = Math.round(parseFloat(data));
+            console.log('Rounded distance received:', distanceRounded);
+            updateTotals();
+        } else {
+            // Ignore non-numeric messages safely
+            console.log('Ignored non-numeric message:', data);
+        }
+        });
+            
     deliveryTypeSelect.addEventListener('change', toggleLocationField);
-
     // Function to communicate with iframe and request selected address
     function requestAddressFromIframe() {
         console.log("Initiating address request from iframe...");
@@ -454,7 +504,7 @@
         console.log('[Order Submit] Requesting address from iframe...');
         const firstAddress = await requestAddressFromIframe();
         const distance = parseFloat(firstAddress.slice(0, 5));
-        const address = firstAddress.slice(7);
+        const address = firstAddress.slice(8);
         console.log('Distance:', distance);         
         console.log('Address:', address);    
 
