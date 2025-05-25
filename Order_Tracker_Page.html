@@ -370,16 +370,21 @@
                 `;
             }
 
+            if (type === 'retrieval') {
+                const checked = order.retrieval_status === 'Completed' ? 'checked' : '';
+                return `
+                    <label style="display:flex; align-items:center; gap:6px;">
+                        <input type="checkbox" class="retrieval-status" data-order-id="${order.order_id}" ${checked}>
+                        Completed
+                    </label>
+                `;
+            }
+
             const maps = {
                 order: {
                     class: 'order-status',
                     options: ['Not Started', 'In Progress', 'Done'],
                     current: order.order_status
-                },
-                retrieval: {
-                    class: 'retrieval-status',
-                    options: ['To be Claimed', 'To be Delivered', 'Claimed', 'Delivered'],
-                    current: order.retrieval_status
                 }
             };
 
@@ -439,7 +444,8 @@
                 const paymentCheckbox = row.querySelector('.payment-status');
                 const paymentStatus = paymentCheckbox.checked ? 'Paid' : 'Not yet Paid';
                 const orderStatus = row.querySelector('.order-status').value;
-                const retrievalStatus = row.querySelector('.retrieval-status').value;
+                const retrievalCheckbox = row.querySelector('.retrieval-status');
+                const retrievalStatus = retrievalCheckbox.checked ? 'Completed' : 'Not Completed';
 
                 // Update order
                 const response = await fetch('update_order.php', {

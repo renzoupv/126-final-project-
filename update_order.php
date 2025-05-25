@@ -19,7 +19,7 @@ try {
     // Determine if order should be active or completed
     $shouldBeCompleted = ($paymentStatus === 'Paid') && 
                          ($orderStatus === 'Done') && 
-                         (in_array($retrievalStatus, ['Claimed', 'Delivered']));
+                         (in_array($retrievalStatus, ['Completed']));
     
     // Update all status fields and completion status
     $stmt = $pdo->prepare("
