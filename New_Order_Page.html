@@ -229,7 +229,7 @@
                     </select>
 
                     <div id="location-container">
-                        <iframe src="Location_Selector.html" width="350" height="600" style="border: none;"></iframe>
+                        <iframe id= location-iframe src="Location_Selector.html" width="350" height="600" style="border: none;"></iframe>
                     </div>
                 </div>
 
@@ -297,177 +297,247 @@
         </form>
     </div>
 
-   
-    <script>
-        document.querySelector('.back-button').addEventListener('click', function(e) {
-            e.preventDefault();
-            window.history.back();
+<script>
+    // Back button
+    document.querySelector('.back-button').addEventListener('click', function(e) {
+        e.preventDefault();
+        console.log("Back button clicked");
+        window.history.back();
+    });
+
+    // Constants
+    const baseWeight = 8;
+    const basePrice = 150;
+    const extraKgPrice = 20;
+    const deliveryFee = 50;
+
+    // DOM references
+    const weightDisplay = document.getElementById('order-weight');
+    const weightDecrease = document.getElementById('weight-decrease');
+    const weightIncrease = document.getElementById('weight-increase');
+    const deliveryTypeSelect = document.getElementById('deliveryType');
+    const locationContainer = document.getElementById('location-container');
+    const locationInput = document.getElementById('location');
+    const deliveryFeeText = document.getElementById('delivery-fee-text');
+
+    function getOrderWeight() {
+        const weight = parseInt(weightDisplay.textContent);
+        console.log("Current order weight:", weight);
+        return weight;
+    }
+
+    function calculateWeightPrice(weight) {
+        const price = weight <= baseWeight ? basePrice : basePrice + (weight - baseWeight) * extraKgPrice;
+        console.log(`Calculated price for weight ${weight}:`, price);
+        return price;
+    }
+
+    function updateTotals() {
+        let subtotal = 0;
+        const weight = getOrderWeight();
+        subtotal += calculateWeightPrice(weight);
+
+        document.querySelectorAll('.addons tr').forEach(row => {
+            const priceText = row.querySelector('td:nth-child(2)')?.textContent;
+            const price = parseInt(priceText?.replace("P", "") || "0");
+            const qty = parseInt(row.querySelector('.qty-value')?.textContent || "0");
+            subtotal += price * qty;
         });
 
-        const baseWeight = 8;
-        const basePrice = 150;
-        const extraKgPrice = 20;
-        const deliveryFee = 50;
+        const isDelivery = deliveryTypeSelect.value === 'Delivery';
+        const total = isDelivery ? subtotal + deliveryFee : subtotal;
 
-        const weightDisplay = document.getElementById('order-weight');
-        const weightDecrease = document.getElementById('weight-decrease');
-        const weightIncrease = document.getElementById('weight-increase');
-        const deliveryTypeSelect = document.getElementById('deliveryType');
-        const locationContainer = document.getElementById('location-container');
-        const locationInput = document.getElementById('location');
-        const deliveryFeeText = document.getElementById('delivery-fee-text');
+        console.log("Subtotal:", subtotal);
+        console.log("Delivery selected:", isDelivery);
+        console.log("Total:", total);
 
-        function getOrderWeight() {
-            return parseInt(weightDisplay.textContent);
-        }
+        document.getElementById('subtotal').textContent = `P${subtotal.toFixed(2)}`;
+        deliveryFeeText.textContent = isDelivery ? `PHP ${deliveryFee}+ Delivery fee` : 'No Delivery Fee';
+        document.getElementById('total').textContent = `P${total.toFixed(2)}`;
+    }
 
-        function calculateWeightPrice(weight) {
-            if (weight <= baseWeight) return basePrice;
-            return basePrice + (weight - baseWeight) * extraKgPrice;
-        }
+    // Add-on quantity buttons
+    document.querySelectorAll('[data-action]').forEach(button => {
+        const action = button.getAttribute('data-action');
+        button.addEventListener('click', () => {
+            const qtySpan = button.parentElement.querySelector('.qty-value');
+            let currentQty = parseInt(qtySpan.textContent);
+            console.log(`Add-on [${action}] clicked. Current quantity: ${currentQty}`);
 
-        function updateTotals() {
-            let subtotal = 0;
-            const weight = getOrderWeight();
-            subtotal += calculateWeightPrice(weight);
+            if (action === 'increase') {
+                currentQty++;
+            } else if (action === 'decrease' && currentQty > 0) {
+                currentQty--;
+            }
 
-            document.querySelectorAll('.addons tr').forEach(row => {
-                const priceText = row.querySelector('td:nth-child(2)')?.textContent;
-                const price = parseInt(priceText?.replace("P", "") || "0");
-                const qty = parseInt(row.querySelector('.qty-value')?.textContent || "0");
-                subtotal += price * qty;
-            });
-
-            const isDelivery = deliveryTypeSelect.value === 'Delivery';
-            const total = isDelivery ? subtotal + deliveryFee : subtotal;
-
-            document.getElementById('subtotal').textContent = `P${subtotal.toFixed(2)}`;
-            deliveryFeeText.textContent = isDelivery ? `PHP ${deliveryFee}+ Delivery fee` : 'No Delivery Fee';
-            document.getElementById('total').textContent = `P${total.toFixed(2)}`;
-        }
-
-        // Add-on quantity button logic
-        document.querySelectorAll('[data-action]').forEach(button => {
-            const action = button.getAttribute('data-action');
-            button.addEventListener('click', () => {
-                const qtySpan = button.parentElement.querySelector('.qty-value');
-                let currentQty = parseInt(qtySpan.textContent);
-
-                if (action === 'increase') {
-                    currentQty++;
-                } else if (action === 'decrease' && currentQty > 0) {
-                    currentQty--;
-                }
-
-                qtySpan.textContent = currentQty;
-                updateTotals();
-            });
+            qtySpan.textContent = currentQty;
+            console.log(`Updated quantity: ${currentQty}`);
+            updateTotals();
         });
+    });
 
-        // Order weight +/- buttons
-        weightIncrease.addEventListener('click', () => {
-            let weight = getOrderWeight();
-            weight++;
+    // Order weight +/- buttons
+    weightIncrease.addEventListener('click', () => {
+        let weight = getOrderWeight();
+        weight++;
+        console.log("Weight increased to", weight);
+        weightDisplay.textContent = weight;
+        updateTotals();
+    });
+
+    weightDecrease.addEventListener('click', () => {
+        let weight = getOrderWeight();
+        if (weight > baseWeight) {
+            weight--;
+            console.log("Weight decreased to", weight);
             weightDisplay.textContent = weight;
             updateTotals();
-        });
-
-        weightDecrease.addEventListener('click', () => {
-            let weight = getOrderWeight();
-            if (weight > baseWeight) {
-                weight--;
-                weightDisplay.textContent = weight;
-                updateTotals();
-            }
-        });
-
-        // Toggle location field based on delivery type
-        function toggleLocationField() {
-            if (deliveryTypeSelect.value === 'Delivery') {
-                locationContainer.style.display = 'block';
-                locationInput.required = true;
-            } else {
-                locationContainer.style.display = 'none';
-                locationInput.required = false;
-                locationInput.value = '';
-            }
-            updateTotals();
         }
+    });
 
-        deliveryTypeSelect.addEventListener('change', toggleLocationField);
+    // Toggle location field
+    function toggleLocationField() {
+        if (deliveryTypeSelect.value === 'Delivery') {
+            locationContainer.style.display = 'block';
+            console.log("Delivery type set to Delivery – showing location field");
+        } else {
+            locationContainer.style.display = 'none';
+            console.log("Delivery type set to Pickup – hiding location field");
+        }
+        updateTotals();
+    }
 
-        document.getElementById('orderForm').addEventListener('submit', async function(e) {
+    deliveryTypeSelect.addEventListener('change', toggleLocationField);
+
+    // Function to communicate with iframe and request selected address
+    function requestAddressFromIframe() {
+        console.log("Initiating address request from iframe...");
+        return new Promise((resolve, reject) => {
+            const iframe = document.getElementById('location-iframe');
+
+            function handleMessage(event) {
+                console.log("Received message from iframe:", event);
+                if (event.source === iframe.contentWindow && event.data?.type === 'selected-location') {
+                    window.removeEventListener('message', handleMessage);
+                    console.log("Address received from iframe:", event.data.address);
+                    resolve(event.data.address);
+                }
+            }
+
+            window.addEventListener('message', handleMessage);
+
+            // Ask iframe to send the selected address
+            try {
+                iframe.contentWindow.postMessage({ type: 'get-address' }, '*');
+                console.log("Message sent to iframe: { type: 'get-address' }");
+            } catch (err) {
+                console.error("Error posting message to iframe:", err);
+                reject(err);
+            }
+
+            // Fallback if iframe doesn't respond in 5 seconds
+            setTimeout(() => {
+                window.removeEventListener('message', handleMessage);
+                console.error("Timeout: No response from iframe");
+                reject(new Error('Timeout waiting for address from iframe'));
+            }, 5000);
+        });
+    }
+
+    // Form submit handler
+    document.getElementById('orderForm').addEventListener('submit', async function(e) {
         e.preventDefault();
-        
-        // Validate form
-        if (deliveryTypeSelect.value === 'Delivery' && !locationInput.value.trim()) {
-            alert('Please enter a delivery location');
-            return;
+        console.log("Order form submission triggered");
+
+    try {
+        // Request address from iframe
+        console.log('[Order Submit] Requesting address from iframe...');
+        const firstAddress = await requestAddressFromIframe();
+        const distance = parseFloat(firstAddress.slice(0, 5));
+        const address = firstAddress.slice(7);
+        console.log('Distance:', distance);         
+        console.log('Address:', address);    
+
+        console.log('[Order Submit] Received address from iframe:', JSON.stringify(address));
+        console.log(deliveryTypeSelect.value,address);
+
+        if (deliveryTypeSelect.value === 'Delivery' && address === '') {
+            alert('Please select a valid address for delivery.');
+            console.warn('[Order Submit] Invalid placeholder address detected:', JSON.stringify(address));
+            console.log('IMBALID');
+
+            return; // 
+
+
         }
 
-        try {
-            // Get add-ons quantities
+
             const addOns = [];
             document.querySelectorAll('.addons tr').forEach(row => {
-                if (row.querySelector('th')) return; // Skip header row
-                
+                if (row.querySelector('th')) return;
+
                 const nameCell = row.querySelector('td:first-child');
                 const qtySpan = row.querySelector('.qty-value');
-                
+
                 if (nameCell && qtySpan) {
-                    const name = nameCell.textContent;
+                    const name = nameCell.textContent.trim();
                     const qty = parseInt(qtySpan.textContent || "0");
-                    
+
                     if (qty > 0) {
                         let addonId = 1; // Towels
                         if (name.includes("Bedsheets")) addonId = 2;
                         if (name.includes("Comforters")) addonId = 3;
-                        
-                        addOns.push({
-                            id: addonId,
-                            quantity: qty
-                        });
+
+                        addOns.push({ id: addonId, quantity: qty });
+                        console.log(`Add-on included: ${name} x${qty} (ID: ${addonId})`);
                     }
                 }
             });
+
+            const formData = {
+                customerName: document.getElementById('customerName').value,
+                contactNumber: document.getElementById('contactNumber').value,
+                deliveryType: deliveryTypeSelect.value,
+                location: address,
+                orderWeight: getOrderWeight(),
+                totalAmount: document.getElementById('total').textContent.replace('P', ''),
+                addons: JSON.stringify(addOns)
+            };
+
+            console.log("Submitting form data:", formData);
 
             const response = await fetch('save_order.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
-                body: new URLSearchParams({
-                    customerName: document.getElementById('customerName').value,
-                    contactNumber: document.getElementById('contactNumber').value,
-                    deliveryType: deliveryTypeSelect.value,
-                    location: locationInput.value,
-                    orderWeight: getOrderWeight(),
-                    totalAmount: document.getElementById('total').textContent.replace('P', ''),
-                    addons: JSON.stringify(addOns)
-                })
+                body: new URLSearchParams(formData)
             });
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
+            const text = await response.text();
+            console.log("Raw response from server:", text);
 
-            const result = await response.json();
-            
+            const result = JSON.parse(text);
+            console.log("Parsed response:", result);
+
             if (result.success) {
                 alert(`Order ${result.orderId} created successfully!`);
                 window.location.href = 'Order_Tracker_Page.html';
             } else {
                 alert('Error saving order: ' + (result.error || 'Unknown error'));
             }
+
         } catch (error) {
-            console.error('Error:', error);
+            console.error('Error during form submission:', error);
             alert('Failed to submit order: ' + error.message);
         }
     });
 
-        // Initialize on load
-        updateTotals();
-        toggleLocationField();
-    </script>
+    // Initial setup
+    console.log("Initializing page...");
+    updateTotals();
+    toggleLocationField();
+</script>
+
 </body>
 </html>

@@ -108,14 +108,14 @@ gmpx-icon-button[variant="filled"]:hover {
 
       </style>
     <script type="module">
-"use strict";
-import {APILoader} from 'https://ajax.googleapis.com/ajax/libs/@googlemaps/extended-component-library/0.6.11/index.min.js';
+      "use strict";
+import { APILoader } from 'https://ajax.googleapis.com/ajax/libs/@googlemaps/extended-component-library/0.6.11/index.min.js';
 
 let gmpMarker = null;
 const CONFIGURATION = {
   "ctaTitle": "Select",
   "mapOptions": {
-    "center": {"lat": 10.6410574, "lng": 122.2263361}, 
+    "center": { "lat": 10.6410574, "lng": 122.2263361 },
     "fullscreenControl": true,
     "mapTypeControl": false,
     "streetViewControl": true,
@@ -131,9 +131,11 @@ const CONFIGURATION = {
     "ctaControl": true
   }
 };
+
 const SHORT_NAME_ADDRESS_COMPONENT_TYPES = new Set([
   'street_number', 'administrative_area_level_1', 'postal_code'
 ]);
+
 const ADDRESS_COMPONENT_TYPES_IN_FORM = [
   'location',
   'locality',
@@ -141,9 +143,54 @@ const ADDRESS_COMPONENT_TYPES_IN_FORM = [
   'postal_code',
   'country',
 ];
+
+// ✅ Distance calculation function
+function getDistanceInKm(lat1, lng1, lat2, lng2) {
+  const toRad = x => x * Math.PI / 180;
+  const R = 6371; // Earth radius in km
+
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+
+  const a = Math.sin(dLat / 2) ** 2 +
+            Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+            Math.sin(dLng / 2) ** 2;
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+window.addEventListener('message', function(event) {
+  if (event.data?.type === 'get-address') {
+    const location = getFormInputElement('location').value;
+    const secondaryLocation = document.getElementById('secondary_location')?.value || '';
+    const locality = getFormInputElement('locality').value;
+    const postalCode = getFormInputElement('postal_code').value;
+    const note = document.getElementById('notes-input')?.value || '';
+
+    const latLng = gmpMarker?.getPosition();
+    let distanceText = '';
+    if (latLng) {
+      const selectedLat = latLng.lat();
+      const selectedLng = latLng.lng();
+      const fixedLat = 10.647167;
+      const fixedLng = 122.232861;
+      const distance = getDistanceInKm(fixedLat, fixedLng, selectedLat, selectedLng);
+      distanceText = `${distance.toFixed(2)}km`;
+    }
+
+    const fullAddress = `${location}${secondaryLocation ? ', ' + secondaryLocation : ''} ${locality} ${postalCode}`;
+    const message = `${distanceText}${fullAddress} ${note}`.trim();
+
+    console.log('Iframe sending address message:', message);
+
+    window.parent.postMessage({ type: 'selected-location', address: message }, '*');
+  }
+});
+
 function getFormInputElement(componentType) {
   return document.getElementById(`${componentType}-input`);
 }
+
 function fillInAddress(place) {
   function getComponentName(componentType) {
     for (const component of place.address_components || []) {
@@ -156,24 +203,25 @@ function fillInAddress(place) {
     return '';
   }
 
-function getComponentText(componentType) {
-  if (componentType === 'location') {
-    if (place.name) {
-      return place.name;
-    } else if (place.geometry && place.geometry.location) {
-      const lat = place.geometry.location.lat();
-      const lng = place.geometry.location.lng();
-      return `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+  function getComponentText(componentType) {
+    if (componentType === 'location') {
+      if (place.name) {
+        return place.name;
+      } else if (place.geometry && place.geometry.location) {
+        const lat = place.geometry.location.lat();
+        const lng = place.geometry.location.lng();
+        return `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+      }
+      return '';
     }
-    return '';
+    return getComponentName(componentType);
   }
-  return getComponentName(componentType);
-}
 
   for (const componentType of ADDRESS_COMPONENT_TYPES_IN_FORM) {
     getFormInputElement(componentType).value = getComponentText(componentType);
   }
 }
+
 let geocoder;
 
 function renderAddress(place) {
@@ -198,6 +246,7 @@ function renderAddress(place) {
     gmpMarker.setPosition(position);
   }
 }
+
 function reverseGeocodeAndFill(latLng) {
   const tempDiv = document.createElement('div');
   document.body.appendChild(tempDiv);
@@ -209,7 +258,7 @@ function reverseGeocodeAndFill(latLng) {
   placesService.nearbySearch(
     {
       location: latLng,
-      radius:5,
+      radius: 5,
       rankBy: google.maps.places.RankBy.PROMINENCE,
     },
     (places, placeStatus) => {
@@ -221,12 +270,10 @@ function reverseGeocodeAndFill(latLng) {
         places.forEach((place, index) => {
           console.log(`#${index + 1} Place: ${place.name}, Types: ${place.types.join(', ')}`);
 
-          // Capture POI
           if (!poiPlace && place.types.includes('point_of_interest')) {
             poiPlace = place;
           }
 
-          // Set secondary location if matches our desired types
           if (!secondaryLocation && place.types.some(type => ['route', 'sublocality', 'sublocality_level_2'].includes(type))) {
             secondaryLocation = place.name;
           }
@@ -319,15 +366,14 @@ initMap();
         </div>
         <input type="text" placeholder="Main Address" id="location-input"/>
         <input type="text" placeholder="Additional Address Information" id="secondary_location"/>
-        <input type="text" placeholder="Miagao" id="locality-input"/>
+        <input type="text" placeholder="Municipality" id="locality-input"/>
         <div class="half-input-container">
-          <input type="text" class="half-input" placeholder="Iloilo" id="administrative_area_level_1-input"/>
-          <input type="text" class="half-input" placeholder="5600" id="postal_code-input"/>
+          <input type="text" class="half-input" placeholder="Western Visayas" id="administrative_area_level_1-input"/>
+          <input type="text" class="half-input" placeholder="5000" id="postal_code-input"/>
         </div>
         <input type="text" placeholder="Country" id="country-input"/>
 <div class="half-input-container">
   <input type="text" class="half-input" placeholder="Notes" id="notes-input"/>
-  <button class="half-input select-btn">Select</button>
 </div>
      </div>
 
