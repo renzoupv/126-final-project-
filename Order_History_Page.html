@@ -195,11 +195,10 @@
                 <tr>
                     <th>Date</th>
                     <th>Customer</th>
-                    <th>Order ID</th>
-                    <th>Payment</th>
+                    <th>Payment Status</th>
+                    <th>Laundry Status</th>
                     <th>Pickup / Delivery</th>
                     <th>Status</th>
-                    <th>Retrieval</th>
                     <th>Total Amount</th>
                     <th>Actions</th>
                 </tr>
@@ -262,12 +261,19 @@
 
         // Create status select dropdown
         function createStatusSelect(type, order) {
+            if (type === 'payment') {
+                // Checkbox for payment status
+                const checked = order.payment_status === 'Paid' ? 'checked' : '';
+                // Using a checkbox with class payment-status and data attribute for order ID
+                return `
+                    <label style="display:flex; align-items:center; gap:6px;">
+                        <input type="checkbox" class="payment-status" data-order-id="${order.order_id}" ${checked}>
+                        Paid
+                    </label>
+                `;
+            }
+
             const maps = {
-                payment: {
-                    class: 'payment-status',
-                    options: ['Not yet Paid', 'Paid'],
-                    current: order.payment_status
-                },
                 order: {
                     class: 'order-status',
                     options: ['Not Started', 'In Progress', 'Done'],
@@ -458,10 +464,9 @@
                     row.innerHTML = `
                         <td>${order.order_date}</td>
                         <td>${order.name}</td>
-                        <td>${order.order_reference}</td>
                         <td>${createStatusSelect('payment', order)}</td>
-                        <td>${order.delivery_type}</td>
                         <td>${createStatusSelect('order', order)}</td>
+                        <td>${order.delivery_type}</td>
                         <td>${createStatusSelect('retrieval', order)}</td>
                         <td>₱${parseFloat(order.total_amount).toFixed(2)}</td>
                         <td>
