@@ -197,6 +197,7 @@
                     <th>Customer</th>
                     <th>Order ID</th>
                     <th>Payment</th>
+                    <th>Pickup / Delivery</th>
                     <th>Status</th>
                     <th>Retrieval</th>
                     <th>Total Amount</th>
@@ -459,6 +460,7 @@
                         <td>${order.name}</td>
                         <td>${order.order_reference}</td>
                         <td>${createStatusSelect('payment', order)}</td>
+                        <td>${order.delivery_type}</td>
                         <td>${createStatusSelect('order', order)}</td>
                         <td>${createStatusSelect('retrieval', order)}</td>
                         <td>₱${parseFloat(order.total_amount).toFixed(2)}</td>

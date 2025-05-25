@@ -264,10 +264,10 @@
                 <tr>
                     <th>Date</th>
                     <th>Name of Customer</th>
-                    <th>Order ID</th>
                     <th>Payment Status</th>
-                    <th>Order Status</th>
-                    <th>Retrieval Status</th>
+                    <th>Laundry Status</th>
+                    <th>Pickup / Delivery</th>
+                    <th>Status</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -334,9 +334,9 @@
                     row.innerHTML = `
                         <td>${order.order_date}</td>
                         <td>${order.name}</td>
-                        <td>${order.order_reference}</td>
                         <td>${createStatusSelect('payment', order)}</td>
                         <td>${createStatusSelect('order', order)}</td>
+                        <td>${order.delivery_type}</td>
                         <td>${createStatusSelect('retrieval', order)}</td>
                         <td>
                             <button class="action-btn save-btn" data-order-id="${order.order_id}">Save</button>
@@ -358,12 +358,19 @@
 
         // Create status select dropdown
         function createStatusSelect(type, order) {
+            if (type === 'payment') {
+                // Checkbox for payment status
+                const checked = order.payment_status === 'Paid' ? 'checked' : '';
+                // Using a checkbox with class payment-status and data attribute for order ID
+                return `
+                    <label style="display:flex; align-items:center; gap:6px;">
+                        <input type="checkbox" class="payment-status" data-order-id="${order.order_id}" ${checked}>
+                        Paid
+                    </label>
+                `;
+            }
+
             const maps = {
-                payment: {
-                    class: 'payment-status',
-                    options: ['Not yet Paid', 'Paid'],
-                    current: order.payment_status
-                },
                 order: {
                     class: 'order-status',
                     options: ['Not Started', 'In Progress', 'Done'],
@@ -406,11 +413,20 @@
                 }
             };
 
-            Object.keys(statusClasses).forEach(type => {
+            // For payment-status (checkbox), add class based on checked state
+            document.querySelectorAll('input.payment-status').forEach(input => {
+                input.classList.remove('paid', 'not-paid');
+                if (input.checked) {
+                    input.classList.add('paid');
+                } else {
+                    input.classList.add('not-paid');
+                }
+            });
+
+            // For selects other than payment-status
+            ['order', 'retrieval'].forEach(type => {
                 document.querySelectorAll(`select.${type}-status`).forEach(select => {
-                    // Reset classes while keeping base class
                     select.className = `${type}-status`;
-                    // Add status class
                     select.classList.add(statusClasses[type][select.value]);
                 });
             });
@@ -420,7 +436,8 @@
         async function saveOrder(orderId, row) {
             try {
                 // Get current values
-                const paymentStatus = row.querySelector('.payment-status').value;
+                const paymentCheckbox = row.querySelector('.payment-status');
+                const paymentStatus = paymentCheckbox.checked ? 'Paid' : 'Not yet Paid';
                 const orderStatus = row.querySelector('.order-status').value;
                 const retrievalStatus = row.querySelector('.retrieval-status').value;
 

@@ -13,7 +13,8 @@ try {
             o.order_status,
             o.retrieval_status,
             o.total_amount,
-            o.is_completed
+            o.is_completed,
+            o.delivery_type
         FROM orders o
         JOIN customers c ON o.customer_id = c.customer_id
         WHERE o.is_completed = 1
