@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Address Selection</title>
+    <style>
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: Roboto, sans-serif;
+}
+
+gmpx-split-layout {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+}
+
+gmpx-split-layout:not(:defined) {
+  visibility: hidden;
+}
+
+/* Input panel styles */
+.panel {
+  flex: 0 0 280px; /* fixed width panel */
+  padding: 10px 15px;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* vertical centering */
+  gap: 8px; /* tighter vertical spacing */
+}
+
+/* Title */
+.sb-title {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.sb-title-icon {
+  width: 18px;
+  height: 18px;
+  vertical-align: middle;
+  margin-right: 4px;
+}
+
+/* General input */
+input[type="text"] {
+  width: 100%;
+  font-size: 12px;
+  padding: 5px 6px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  height: 30px;
+  box-sizing: border-box;
+}
+
+/* Smaller half-width input row */
+.half-input-container {
+  display: flex;
+  gap: 8px;
+}
+
+.half-input {
+  flex: 1;
+}
+.select-btn {
+  height: 30px;
+  font-size: 12px;
+  padding: 5px 10px;
+  border: 1px solid #007bff;
+  background-color: #007bff;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+/* Hover effect */
+.select-btn:hover {
+  background-color: #0056b3;
+  border-color: #0056b3;
+}
+
+/* Placeholder styling */
+input:focus::placeholder {
+  color: #ccc;
+}
+
+/* Checkout button */
+gmpx-icon-button[variant="filled"] {
+  align-self: flex-end;
+  font-size: 12px !important;
+  padding: 4px 10px !important;
+  background-color: #007bff !important;
+  color: white !important;
+  border-radius: 2px !important;
+  cursor: pointer;
+}
+
+gmpx-icon-button[variant="filled"]:hover {
+  background-color: #0056b3 !important;
+}
+
+      </style>
+    <script type="module">
+"use strict";
+import {APILoader} from 'https://ajax.googleapis.com/ajax/libs/@googlemaps/extended-component-library/0.6.11/index.min.js';
+
+let gmpMarker = null;
+const CONFIGURATION = {
+  "ctaTitle": "Select",
+  "mapOptions": {
+    "center": {"lat": 10.6410574, "lng": 122.2263361}, 
+    "fullscreenControl": true,
+    "mapTypeControl": false,
+    "streetViewControl": true,
+    "zoom": 17,
+    "zoomControl": true,
+    "maxZoom": 22,
+    "mapId": ""
+  },
+  "mapsApiKey": "AIzaSyBZDZcpbDVOU7nhq8q2tMqGKUKbO-cpkLo",
+  "capabilities": {
+    "addressAutocompleteControl": true,
+    "mapDisplayControl": true,
+    "ctaControl": true
+  }
+};
+const SHORT_NAME_ADDRESS_COMPONENT_TYPES = new Set([
+  'street_number', 'administrative_area_level_1', 'postal_code'
+]);
+const ADDRESS_COMPONENT_TYPES_IN_FORM = [
+  'location',
+  'locality',
+  'administrative_area_level_1',
+  'postal_code',
+  'country',
+];
+function getFormInputElement(componentType) {
+  return document.getElementById(`${componentType}-input`);
+}
+function fillInAddress(place) {
+  function getComponentName(componentType) {
+    for (const component of place.address_components || []) {
+      if (component.types[0] === componentType) {
+        return SHORT_NAME_ADDRESS_COMPONENT_TYPES.has(componentType)
+          ? component.short_name
+          : component.long_name;
+      }
+    }
+    return '';
+  }
+
+function getComponentText(componentType) {
+  if (componentType === 'location') {
+    if (place.name) {
+      return place.name;
+    } else if (place.geometry && place.geometry.location) {
+      const lat = place.geometry.location.lat();
+      const lng = place.geometry.location.lng();
+      return `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+    }
+    return '';
+  }
+  return getComponentName(componentType);
+}
+
+  for (const componentType of ADDRESS_COMPONENT_TYPES_IN_FORM) {
+    getFormInputElement(componentType).value = getComponentText(componentType);
+  }
+}
+let geocoder;
+
+function renderAddress(place) {
+  const mapEl = document.querySelector('gmp-map');
+  const map = mapEl.innerMap;
+  const position = place.geometry.location;
+
+  map.setCenter(position);
+
+  if (!gmpMarker) {
+    gmpMarker = new google.maps.Marker({
+      position,
+      map,
+      draggable: true
+    });
+
+    gmpMarker.addListener('dragend', () => {
+      const pos = gmpMarker.getPosition();
+      reverseGeocodeAndFill(pos);
+    });
+  } else {
+    gmpMarker.setPosition(position);
+  }
+}
+function reverseGeocodeAndFill(latLng) {
+  const tempDiv = document.createElement('div');
+  document.body.appendChild(tempDiv);
+
+  const placesService = new google.maps.places.PlacesService(tempDiv);
+  const geocoder = new google.maps.Geocoder();
+  const geocoderRequest = { location: latLng };
+
+  placesService.nearbySearch(
+    {
+      location: latLng,
+      radius:5,
+      rankBy: google.maps.places.RankBy.PROMINENCE,
+    },
+    (places, placeStatus) => {
+      let placeName = `${latLng.lat()}, ${latLng.lng()}`;
+      let poiPlace = null;
+      let secondaryLocation = '';
+
+      if (placeStatus === google.maps.places.PlacesServiceStatus.OK && places.length > 0) {
+        places.forEach((place, index) => {
+          console.log(`#${index + 1} Place: ${place.name}, Types: ${place.types.join(', ')}`);
+
+          // Capture POI
+          if (!poiPlace && place.types.includes('point_of_interest')) {
+            poiPlace = place;
+          }
+
+          // Set secondary location if matches our desired types
+          if (!secondaryLocation && place.types.some(type => ['route', 'sublocality', 'sublocality_level_2'].includes(type))) {
+            secondaryLocation = place.name;
+          }
+        });
+
+        if (poiPlace) {
+          placeName = poiPlace.name;
+          console.log(`First point_of_interest found: ${placeName}`);
+        } else {
+          console.log(`No point_of_interest found; fallback to coordinates: ${placeName}`);
+        }
+      } else {
+        console.log(`PlacesService failed or no places; fallback to coordinates: ${placeName}`);
+      }
+
+      const secondaryLocationInput = document.getElementById('secondary_location');
+      if (secondaryLocationInput) {
+        secondaryLocationInput.value = secondaryLocation;
+        console.log("Secondary location set to:", secondaryLocation);
+      }
+
+      geocoder.geocode(geocoderRequest, (results, geoStatus) => {
+        if (geoStatus === google.maps.GeocoderStatus.OK && results[0]) {
+          const addressComponents = results[0].address_components;
+          const formattedPlace = {
+            name: placeName,
+            address_components: addressComponents,
+            geometry: { location: latLng }
+          };
+
+          fillInAddress(formattedPlace);
+        } else {
+          console.error("Geocoder failed due to: " + geoStatus);
+        }
+      });
+    }
+  );
+}
+
+async function initMap() {
+  const { Autocomplete } = await APILoader.importLibrary('places');
+  geocoder = new google.maps.Geocoder();
+
+  const mapOptions = CONFIGURATION.mapOptions;
+  mapOptions.mapId = mapOptions.mapId || 'DEMO_MAP_ID';
+
+  await customElements.whenDefined('gmp-map');
+  const gmpMap = document.querySelector('gmp-map');
+  const map = gmpMap.innerMap;
+
+  map.setOptions(mapOptions);
+
+  const defaultBounds = {
+    north: 10.645,
+    south: 10.637,
+    east: 122.231,
+    west: 122.221
+  };
+
+  const autocomplete = new Autocomplete(getFormInputElement('location'), {
+    fields: ['address_components', 'geometry', 'name'],
+    bounds: defaultBounds,
+    strictBounds: false,
+    componentRestrictions: { country: "ph" }
+  });
+
+  autocomplete.addListener('place_changed', () => {
+    const place = autocomplete.getPlace();
+    if (!place.geometry) {
+      window.alert(`No details available for input: '${place.name}'`);
+      return;
+    }
+    renderAddress(place);
+    fillInAddress(place);
+  });
+}
+
+initMap();
+
+    </script>
+  </head>
+  <body>
+    <gmpx-api-loader key="AIzaSyBZDZcpbDVOU7nhq8q2tMqGKUKbO-cpkLo" solution-channel="GMP_QB_addressselection_v4_cABC">
+    </gmpx-api-loader>
+    <gmpx-split-layout row-layout-min-width="600">
+      <div class="panel" slot="fixed">
+        <div>
+          <img class="sb-title-icon" src="https://fonts.gstatic.com/s/i/googlematerialicons/location_pin/v5/24px.svg" alt="">
+          <span class="sb-title">Address Selection</span>
+        </div>
+        <input type="text" placeholder="Main Address" id="location-input"/>
+        <input type="text" placeholder="Additional Address Information" id="secondary_location"/>
+        <input type="text" placeholder="Miagao" id="locality-input"/>
+        <div class="half-input-container">
+          <input type="text" class="half-input" placeholder="Iloilo" id="administrative_area_level_1-input"/>
+          <input type="text" class="half-input" placeholder="5600" id="postal_code-input"/>
+        </div>
+        <input type="text" placeholder="Country" id="country-input"/>
+<div class="half-input-container">
+  <input type="text" class="half-input" placeholder="Notes" id="notes-input"/>
+  <button class="half-input select-btn">Select</button>
+</div>
+     </div>
+
+      <gmp-map slot="main">
+      </gmp-map>
+    </gmpx-split-layout>
+  </body>
+</html>

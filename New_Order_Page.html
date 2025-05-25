@@ -185,6 +185,10 @@
         #location-container {
             display: none;
             margin-bottom: 25px;
+            margin-right: 500px;
+            position: relative; /* or absolute/fixed depending on use */
+        
+
         }
 
         /* Responsive stacking for smaller screens */
@@ -225,8 +229,7 @@
                     </select>
 
                     <div id="location-container">
-                        <label for="location">For delivery, enter location:</label>
-                        <input type="text" id="location" name="location" placeholder="Location">
+                        <iframe src="Location_Selector.html" width="350" height="600" style="border: none;"></iframe>
                     </div>
                 </div>
 
