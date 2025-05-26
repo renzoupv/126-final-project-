@@ -241,7 +241,32 @@
             display: none;
         }
 
-        
+        .customer-tooltip-container {
+            position: relative;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        .customer-tooltip {
+            display: none;
+            position: absolute;
+            top: 120%;
+            left: 0;
+            z-index: 10;
+            background-color: #fff;
+            color: #333;
+            border: 1px solid #ccc;
+            padding: 8px 10px;
+            border-radius: 6px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            white-space: nowrap;
+            font-size: 14px;
+            min-width: 200px;
+        }
+
+        .customer-tooltip-container:hover .customer-tooltip {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -262,13 +287,15 @@
         <table id="ordersTable">
             <thead>
                 <tr>
-                    <th>Date</th>
-                    <th>Name of Customer</th>
-                    <th>Payment Status</th>
-                    <th>Laundry Status</th>
-                    <th>Pickup / Delivery</th>
-                    <th>Status</th>
-                    <th>Actions</th>
+                    <th>Date 📅</th>
+                    <th>Name 🖋️</th>
+                    <th>Weight (kg) ⚖️</th>
+                    <th>Payment Status 💳</th>
+                    <th>Laundry Status 🫧</th>
+                    <th>Pickup / Delivery 🏍️</th>
+                    <th>Complete Order ✅</th>
+                    <th>Total Amount 💲</th>
+                    <th>Actions 💥</th>
                 </tr>
             </thead>
             <tbody id="ordersTableBody">
@@ -330,16 +357,43 @@
                     
                     const row = document.createElement('tr');
                     row.dataset.orderId = order.order_id;
-                    
+
+                    let totalAddonPrice = 0;
+                    const addonDetails = Array.isArray(order.addons) && order.addons.length > 0
+                    ? order.addons.map(addon => {
+                        const totalAddon = addon.quantity * addon.price;
+                        totalAddonPrice += totalAddon;
+                        return `• ${addon.quantity}x ${addon.addon_name} (₱${totalAddon.toFixed(2)})`;
+                    }).join('<br>')
+                    : 'None';
+
+                    let weightPrice = calculateWeightPrice(order.order_weight);
+                    let subTotal = parseFloat(totalAddonPrice) + parseFloat(weightPrice);
+
                     row.innerHTML = `
                         <td>${order.order_date}</td>
-                        <td>${order.name}</td>
+                        <td>
+                            <span class="customer-tooltip-container">
+                                ${order.customer_name}
+                                <div class="customer-tooltip">
+                                <strong>Weight Price:</strong> ₱${weightPrice}<br> 
+                                <strong>Add-ons:</strong><br> ${addonDetails}<br>
+                                <strong>Add-ons Total:</strong> ₱${totalAddonPrice.toFixed(2)}<br>
+                                <hr>
+                                <strong>Subtotal: </strong> ₱${subTotal.toFixed(2)}<br>
+                                <strong>+ </strong><br>
+                                <strong>Delivery Fee: </strong> ₱${order.delivery_fee}<br>
+                                </div>
+                            </span>
+                        </td>
+                        <td>${order.order_weight}</td>
                         <td>${createStatusSelect('payment', order)}</td>
                         <td>${createStatusSelect('order', order)}</td>
                         <td>${order.delivery_type}</td>
                         <td>${createStatusSelect('retrieval', order)}</td>
+                        <td>${order.total_amount}</td>
                         <td>
-                            <button class="action-btn save-btn" data-order-id="${order.order_id}">Save</button>
+                            <button class="action-btn save-btn" data-order-id="${order.order_id}">Save</button><br>
                             <button class="action-btn delete-btn" data-order-id="${order.order_id}">Delete</button>
                         </td>`;
                     
@@ -474,7 +528,7 @@
                     
                     setTimeout(() => {
                         row.remove();
-                        showAlert('Order completed and moved to history!', 'success');
+                        showAlert('Order completed and moved to history', 'success');
                         
                         // Check if table is empty after removal
                         const tbody = document.getElementById('ordersTableBody');
@@ -661,6 +715,13 @@
             } else {
                 alert('Error: ' + message);
             }
+        }
+
+        function calculateWeightPrice(weight) {
+            const pricePerKg = 20;
+            const basePrice = 150;
+            const price = basePrice + ((weight - 8) * pricePerKg);
+            return price.toFixed(2);
         }
     </script>
 </body>

@@ -7,6 +7,7 @@ $orderId = $data['orderId'] ?? null;
 $paymentStatus = $data['payment_status'] ?? null;
 $orderStatus = $data['order_status'] ?? null;
 $retrievalStatus = $data['retrieval_status'] ?? null;
+$revert = $data['revert'] ?? false;
 
 if (!$orderId) {
     echo json_encode(['success' => false, 'error' => 'Order ID required']);
@@ -15,13 +16,31 @@ if (!$orderId) {
 
 try {
     $pdo->beginTransaction();
-    
-    // Determine if order should be active or completed
+
+    if ($revert) {
+        // Revert order to active - ignore status, clear completion
+        $stmt = $pdo->prepare("
+            UPDATE orders
+            SET is_completed = 0,
+                completed_at = NULL
+            WHERE order_id = :order_id
+        ");
+        $stmt->execute([':order_id' => $orderId]);
+
+        $pdo->commit();
+
+        echo json_encode([
+            'success' => true,
+            'message' => 'Order reverted to active state'
+        ]);
+        exit;
+    }
+
+    // Normal save/update behavior: update statuses and decide if completed
     $shouldBeCompleted = ($paymentStatus === 'Paid') && 
                          ($orderStatus === 'Done') && 
                          (in_array($retrievalStatus, ['Completed']));
-    
-    // Update all status fields and completion status
+
     $stmt = $pdo->prepare("
         UPDATE orders 
         SET payment_status = :payment_status,
@@ -38,16 +57,16 @@ try {
         ':is_completed' => $shouldBeCompleted ? 1 : 0,
         ':order_id' => $orderId
     ]);
-    
+
     $pdo->commit();
-    
+
     echo json_encode([
         'success' => true,
         'isCompleted' => $shouldBeCompleted,
         'isActive' => !$shouldBeCompleted,
         'message' => $shouldBeCompleted ? 'Order marked as completed' : 'Status updated'
     ]);
-    
+
 } catch (PDOException $e) {
     $pdo->rollBack();
     echo json_encode([
