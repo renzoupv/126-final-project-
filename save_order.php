@@ -31,6 +31,8 @@ $location = trim($_POST['location'] ?? '');
 $orderWeight = (float)($_POST['orderWeight'] ?? 0);
 $totalAmount = (float)str_replace(['P', 'PHP', ' ', ','], '', $_POST['totalAmount'] ?? '0');
 $addons = json_decode($_POST['addons'] ?? '[]', true);
+$latitude = isset($_POST['latitude']) ? (float)$_POST['latitude'] : null;
+$longitude = isset($_POST['longitude']) ? (float)$_POST['longitude'] : null;
 
 // Validate required fields
 if (empty($customerName)) {
@@ -64,15 +66,16 @@ try {
         customer_id, order_date, order_reference, order_weight, 
         delivery_type, delivery_location, subtotal, 
         delivery_fee, total_amount, payment_status, 
-        order_status, retrieval_status
-    ) VALUES (?, NOW(), ?, ?, ?, ?, ?, ?, ?, 'Not yet Paid', 'Not Started', ?)");
+        order_status, retrieval_status, latitude, longitude
+    ) VALUES (?, NOW(), ?, ?, ?, ?, ?, ?, ?, 'Not yet Paid', 'Not Started', ?, ?, ?)");
     
     $retrievalStatus = ($deliveryType === 'Delivery') ? 'To be Delivered' : 'To be Claimed';
     
     $stmt->execute([
         $customerId, $orderRef, $orderWeight, $deliveryType,
         $deliveryType === 'Delivery' ? $location : null,
-        $subtotal, $deliveryFee, $totalAmount, $retrievalStatus
+        $subtotal, $deliveryFee, $totalAmount, $retrievalStatus,
+        $latitude, $longitude
     ]);
     
     $orderId = $pdo->lastInsertId();

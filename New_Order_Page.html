@@ -208,7 +208,7 @@
     
     <div class="header-container">
         <img src="images/bubbles.png" alt="Laundry Company Logo" class="header-image">
-        <h1 class="page-header">New Order</h1>
+        <h1 class="page-header">New asd</h1>
     </div>
     
     <div class="container">
@@ -242,53 +242,53 @@
                     </div>
 
                     <div class="addons">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th scope="col">Add Ons</th>
-                                    <th scope="col">Price</th>
-                                    <th scope="col">Quantity</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Towels</td>
-                                    <td>P30</td>
-                                    <td style="display: flex; align-items: center; gap: 8px;">
-                                        <button type="button" class="qty-btn" data-action="decrease" aria-label="Decrease towel quantity">-</button>
-                                        <span class="qty-value">0</span>
-                                        <button type="button" class="qty-btn" data-action="increase" aria-label="Increase towel quantity">+</button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Bedsheets/Pillowcases</td>
-                                    <td>P50</td>
-                                    <td style="display: flex; align-items: center; gap: 8px;">
-                                        <button type="button" class="qty-btn" data-action="decrease" aria-label="Decrease bedsheets quantity">-</button>
-                                        <span class="qty-value">0</span>
-                                        <button type="button" class="qty-btn" data-action="increase" aria-label="Increase bedsheets quantity">+</button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Comforters</td>
-                                    <td>P75</td>
-                                    <td style="display: flex; align-items: center; gap: 8px;">
-                                        <button type="button" class="qty-btn" data-action="decrease" aria-label="Decrease comforter quantity">-</button>
-                                        <span class="qty-value">0</span>
-                                        <button type="button" class="qty-btn" data-action="increase" aria-label="Increase comforter quantity">+</button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+    <table>
+        <thead>
+            <tr>
+                <th scope="col">Add Ons</th>
+                <th scope="col">Price</th>
+                <th scope="col">Quantity</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Towels</td>
+                <td>P30</td>
+                <td style="display: flex; align-items: center; gap: 8px;">
+                    <button type="button" class="qty-btn" data-action="decrease" aria-label="Decrease towel quantity">-</button>
+                    <span class="qty-value">0</span>
+                    <button type="button" class="qty-btn" data-action="increase" aria-label="Increase towel quantity">+</button>
+                </td>
+            </tr>
+            <tr>
+                <td>Bedsheets/Pillowcases</td>
+                <td>P50</td>
+                <td style="display: flex; align-items: center; gap: 8px;">
+                    <button type="button" class="qty-btn" data-action="decrease" aria-label="Decrease bedsheets quantity">-</button>
+                    <span class="qty-value">0</span>
+                    <button type="button" class="qty-btn" data-action="increase" aria-label="Increase bedsheets quantity">+</button>
+                </td>
+            </tr>
+            <tr>
+                <td>Comforters</td>
+                <td>P75</td>
+                <td style="display: flex; align-items: center; gap: 8px;">
+                    <button type="button" class="qty-btn" data-action="decrease" aria-label="Decrease comforter quantity">-</button>
+                    <span class="qty-value">0</span>
+                    <button type="button" class="qty-btn" data-action="increase" aria-label="Increase comforter quantity">+</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="summary">
+        <p id="summary-base"></p>
+        <p id="summary-addons"></p>
+        <p id="delivery-fee-text"></p>
+        <p><strong id="total">Total: PHP 0.00</strong></p>
+    </div>
+</div>
 
-               <div class="summary">
-                <p id="summary-base"></p>
-                <p id="summary-addons"></p>
-                <p id="delivery-fee-text"></p>
-                <p><strong id="total">Total: PHP 0.00</strong></p>
-                </div>
-                </div>
+               </div>
             </div>
 
             <!-- Submit Button now outside the columns -->
@@ -494,6 +494,50 @@ function updateTotals() {
         });
     }
 
+    // Example for handling both messages
+let latestAddress = '';
+let latestLat = null;
+let latestLng = null;
+
+function requestAddressAndCoordsFromIframe() {
+  return new Promise((resolve, reject) => {
+    const iframe = document.getElementById('location-iframe');
+    let gotAddress = false, gotCoords = false;
+
+    function handleMessage(event) {
+      if (event.source !== iframe.contentWindow) return;
+
+      if (event.data?.type === 'selected-location') {
+        latestAddress = event.data.address;
+        gotAddress = true;
+      }
+      if (event.data?.type === 'selected-coordinates') {
+        latestLat = event.data.lat;
+        latestLng = event.data.lng;
+        gotCoords = true;
+      }
+      if (gotAddress && gotCoords) {
+        window.removeEventListener('message', handleMessage);
+        resolve({
+          address: latestAddress,
+          lat: latestLat,
+          lng: latestLng
+        });
+      }
+    }
+
+    window.addEventListener('message', handleMessage);
+
+    // Ask iframe to send the selected address and coordinates
+    iframe.contentWindow.postMessage({ type: 'get-address' }, '*');
+
+    setTimeout(() => {
+      window.removeEventListener('message', handleMessage);
+      reject(new Error('Timeout waiting for address/coords from iframe'));
+    }, 5000);
+  });
+}
+
     // Form submit handler
     document.getElementById('orderForm').addEventListener('submit', async function(e) {
         e.preventDefault();
@@ -502,58 +546,77 @@ function updateTotals() {
     try {
         // Request address from iframe
         console.log('[Order Submit] Requesting address from iframe...');
-        const firstAddress = await requestAddressFromIframe();
-        const distance = parseFloat(firstAddress.slice(0, 5));
-        const address = firstAddress.slice(8);
-        console.log('Distance:', distance);         
-        console.log('Address:', address);    
+        let address = '';
+        let lat = null;
+        let lng = null;
 
-        console.log('[Order Submit] Received address from iframe:', JSON.stringify(address));
-        console.log(deliveryTypeSelect.value,address);
-
-        if (deliveryTypeSelect.value === 'Delivery' && address === '') {
-            alert('Please select a valid address for delivery.');
-            console.warn('[Order Submit] Invalid placeholder address detected:', JSON.stringify(address));
-            console.log('IMBALID');
-
-            return; // 
-
-
+        if (deliveryTypeSelect.value === 'Delivery') {
+            const locationData = await requestAddressAndCoordsFromIframe();
+            address = locationData.address;
+            lat = locationData.lat;
+            lng = locationData.lng;
+        } else {
+            // Default to shop coordinates for Pickup
+            address = 'Shop Pickup';
+            lat = 10.647167;
+            lng = 122.232861;
         }
 
+        const weight = getOrderWeight();
+const basePriceValue = calculateWeightPrice(weight);
 
-            const addOns = [];
-            document.querySelectorAll('.addons tr').forEach(row => {
-                if (row.querySelector('th')) return;
+// Calculate add-ons subtotal
+let addonsSubtotal = 0;
+document.querySelectorAll('.addons tr').forEach(row => {
+    const priceText = row.querySelector('td:nth-child(2)')?.textContent;
+    const price = parseInt(priceText?.replace("P", "") || "0");
+    const qty = parseInt(row.querySelector('.qty-value')?.textContent || "0");
+    if (qty > 0) {
+        addonsSubtotal += price * qty;
+    }
+});
 
-                const nameCell = row.querySelector('td:first-child');
-                const qtySpan = row.querySelector('.qty-value');
+const isDelivery = deliveryTypeSelect.value === 'Delivery';
 
-                if (nameCell && qtySpan) {
-                    const name = nameCell.textContent.trim();
-                    const qty = parseInt(qtySpan.textContent || "0");
+// Delivery fee calculation
+let baseDeliveryFee = 0;
+let extraDeliveryFee = 0;
+let extraKm = 0;
+if (isDelivery) {
+    baseDeliveryFee = baseDF;
+    if (distanceRounded > 2) {
+        extraKm = distanceRounded - 2;
+        extraDeliveryFee = extraKm * peraddtlKMPrice;
+    }
+}
+const totalDeliveryFee = baseDeliveryFee + extraDeliveryFee;
+const totalAmount = isDelivery
+    ? basePriceValue + addonsSubtotal + totalDeliveryFee
+    : basePriceValue + addonsSubtotal;
 
-                    if (qty > 0) {
-                        let addonId = 1; // Towels
-                        if (name.includes("Bedsheets")) addonId = 2;
-                        if (name.includes("Comforters")) addonId = 3;
+        // Build addOns array from the table
+let addOns = [];
+document.querySelectorAll('.addons tr').forEach(row => {
+    const name = row.querySelector('td:nth-child(1)')?.textContent?.trim();
+    const priceText = row.querySelector('td:nth-child(2)')?.textContent;
+    const price = parseInt(priceText?.replace("P", "") || "0");
+    const qty = parseInt(row.querySelector('.qty-value')?.textContent || "0");
+    if (qty > 0) {
+        addOns.push({ name, price, quantity: qty });
+    }
+});
 
-                        addOns.push({ id: addonId, quantity: qty });
-                        console.log(`Add-on included: ${name} x${qty} (ID: ${addonId})`);
-                    }
-                }
-            });
-
-            const formData = {
-                customerName: document.getElementById('customerName').value,
-                contactNumber: document.getElementById('contactNumber').value,
-                deliveryType: deliveryTypeSelect.value,
-                location: address,
-                orderWeight: getOrderWeight(),
-                totalAmount: document.getElementById('total').textContent.replace('P', ''),
-                addons: JSON.stringify(addOns)
-            };
-
+        const formData = {
+            customerName: document.getElementById('customerName').value,
+            contactNumber: document.getElementById('contactNumber').value,
+            deliveryType: deliveryTypeSelect.value,
+            location: address,
+            latitude: lat,
+            longitude: lng,
+            orderWeight: getOrderWeight(),
+            totalAmount: totalAmount,
+            addons: JSON.stringify(addOns)
+        };
             console.log("Submitting form data:", formData);
 
             const response = await fetch('save_order.php', {

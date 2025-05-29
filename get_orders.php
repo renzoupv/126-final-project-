@@ -17,7 +17,10 @@ try {
             o.is_completed,
             o.delivery_type,
             o.delivery_fee,
-            o.order_weight
+            o.order_weight,
+            o.delivery_location,
+            o.latitude,
+            o.longitude
         FROM orders o
         JOIN customers c ON o.customer_id = c.customer_id
         WHERE o.is_completed = 0

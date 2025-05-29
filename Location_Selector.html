@@ -175,22 +175,24 @@ window.addEventListener('message', function(event) {
     const note = document.getElementById('notes-input')?.value || '';
 
     const latLng = gmpMarker?.getPosition();
-    let distanceText = '';
+    let selectedLat = null, selectedLng = null;
     if (latLng) {
-      const selectedLat = latLng.lat();
-      const selectedLng = latLng.lng();
-      const fixedLat = 10.647167;
-      const fixedLng = 122.232861;
-      const distance = getDistanceInKm(fixedLat, fixedLng, selectedLat, selectedLng);
-      distanceText = `${distance.toFixed(2)}km`;
+      selectedLat = latLng.lat();
+      selectedLng = latLng.lng();
     }
 
     const fullAddress = `${location}${secondaryLocation ? ', ' + secondaryLocation : ''} ${locality} ${postalCode}`;
-    const message = `${distanceText}${fullAddress} ${note}`.trim();
+    const message = `${fullAddress} ${note}`.trim();
 
     console.log('Iframe sending address message:', message);
 
+    // Send address message
     window.parent.postMessage({ type: 'selected-location', address: message }, '*');
+
+    // Send coordinates as a separate message
+    if (selectedLat !== null && selectedLng !== null) {
+      window.parent.postMessage({ type: 'selected-coordinates', lat: selectedLat, lng: selectedLng }, '*');
+    }
   }
 });
 
