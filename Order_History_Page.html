@@ -226,6 +226,7 @@
                     <th>Payment Status 💳</th>
                     <th>Laundry Status 🫧</th>
                     <th>Pickup / Delivery 🏍️</th>
+                    <th>Location 📍</th>
                     <th>Complete Order ✅</th>
                     <th>Total Amount 💲</th>
                     <th>Actions 💥</th>
@@ -492,53 +493,52 @@
                     return;
                 }
 
-                result.orders.forEach(order => {
-                    const row = document.createElement('tr');
-                    row.dataset.orderId = order.order_id;
-                    
-                    let totalAddonPrice = 0;
-                    const addonDetails = Array.isArray(order.addons) && order.addons.length > 0
-                    ? order.addons.map(addon => {
-                        const totalAddon = addon.quantity * addon.price;
-                        totalAddonPrice += totalAddon;
-                        return `• ${addon.quantity}x ${addon.addon_name} (₱${totalAddon.toFixed(2)})`;
-                    }).join('<br>')
-                    : 'None';
+        result.orders.forEach(order => {
+            const row = document.createElement('tr');
+            row.dataset.orderId = order.order_id;
+            
+            let totalAddonPrice = 0;
+            const addonDetails = Array.isArray(order.addons) && order.addons.length > 0
+            ? order.addons.map(addon => {
+                const totalAddon = addon.quantity * addon.price;
+                totalAddonPrice += totalAddon;
+                return `• ${addon.quantity}x ${addon.addon_name} (₱${totalAddon.toFixed(2)})`;
+            }).join('<br>')
+            : 'None';
 
-                    let weightPrice = calculateWeightPrice(order.order_weight);
-                    let subTotal = parseFloat(totalAddonPrice) + parseFloat(weightPrice);
+            let weightPrice = calculateWeightPrice(order.order_weight);
+            let subTotal = parseFloat(totalAddonPrice) + parseFloat(weightPrice);
 
-                    row.innerHTML = `
-                        <td>${order.order_date}</td>
-                        <td>
-                            <span class="customer-tooltip-container">
-                                ${order.customer_name}
-                                <div class="customer-tooltip">
-                                <strong>Weight Price:</strong> ₱${weightPrice}<br> 
-                                <strong>Add-ons:</strong><br> ${addonDetails}<br>
-                                <strong>Add-ons Total:</strong> ₱${totalAddonPrice.toFixed(2)}<br>
-                                <hr>
-                                <strong>Subtotal: </strong> ₱${subTotal.toFixed(2)}<br>
-                                <strong>+ </strong><br>
-                                <strong>Delivery Fee: </strong> ₱${order.delivery_fee}<br>
-                                </div>
-                            </span>
-                        </td>
-                        <td>${order.order_weight}</td>
-                        <td>Paid</td>
-                        <td>Done</td>
-                        <td>${order.delivery_type}</td>
-                        <td>Completed</td>
-                        <td>${order.total_amount}</td>
-                        <td>
-                            <button class="action-btn revert-btn" data-order-id="${order.order_id}">Revert</button><br>
-                            <button class="action-btn delete-btn" data-order-id="${order.order_id}">Delete</button>
-                        </td>`;
-                    
-                    tbody.appendChild(row);
-                });
-
-                updateAllSelectStyles();
+            row.innerHTML = `
+                <td>${order.order_date}</td>
+                <td>
+                    <span class="customer-tooltip-container">
+                        ${order.customer_name}
+                        <div class="customer-tooltip">
+                        <strong>Weight Price:</strong> ₱${weightPrice}<br> 
+                        <strong>Add-ons:</strong><br> ${addonDetails}<br>
+                        <strong>Add-ons Total:</strong> ₱${totalAddonPrice.toFixed(2)}<br>
+                        <hr>
+                        <strong>Subtotal: </strong> ₱${subTotal.toFixed(2)}<br>
+                        <strong>+ </strong><br>
+                        <strong>Delivery Fee: </strong> ₱${order.delivery_fee}<br>
+                        </div>
+                    </span>
+                </td>
+                <td>${order.order_weight}</td>
+                <td>Paid</td>
+                <td>Done</td>
+                <td>${order.delivery_type}</td>
+                <td>${order.delivery_location || ''}</td> <!-- CHANGED: Show actual address -->
+                <td>Completed</td>
+                <td>${order.total_amount}</td>
+                <td>
+                    <button class="action-btn revert-btn" data-order-id="${order.order_id}">Revert</button><br>
+                    <button class="action-btn delete-btn" data-order-id="${order.order_id}">Delete</button>
+                </td>`;
+            
+            tbody.appendChild(row);
+        });
                 setupEventListeners();
 
             } catch (error) {

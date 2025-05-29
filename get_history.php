@@ -17,7 +17,8 @@ try {
             o.is_completed,
             o.delivery_type,
             o.order_weight,
-            o.delivery_fee
+            o.delivery_fee,
+            o.delivery_location   -- <-- Add this line
         FROM orders o
         JOIN customers c ON o.customer_id = c.customer_id
         WHERE o.is_completed = 1
