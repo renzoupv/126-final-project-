@@ -208,7 +208,7 @@
     
     <div class="header-container">
         <img src="images/bubbles.png" alt="Laundry Company Logo" class="header-image">
-        <h1 class="page-header">New asd</h1>
+        <h1 class="page-header">New Order</h1>
     </div>
     
     <div class="container">
@@ -315,7 +315,6 @@
     const baseDF = 20;
     const peraddtlKMPrice = 15;
     const extraKgPrice = 20;
-    const deliveryFee = 50;
 
     // DOM references
     const weightDisplay = document.getElementById('order-weight');
@@ -367,8 +366,8 @@ function updateTotals() {
         }
     }
 
-    const totalDeliveryFee = baseDeliveryFee + extraDeliveryFee;
-    const total = isDelivery ? basePriceValue + addonsSubtotal + totalDeliveryFee : basePriceValue + addonsSubtotal;
+    const delivery_fee = baseDeliveryFee + extraDeliveryFee;
+    const total = isDelivery ? basePriceValue + addonsSubtotal + delivery_fee : basePriceValue + addonsSubtotal;
 
     // UI updates
     document.getElementById('summary-base').innerHTML = `
@@ -589,9 +588,9 @@ if (isDelivery) {
         extraDeliveryFee = extraKm * peraddtlKMPrice;
     }
 }
-const totalDeliveryFee = baseDeliveryFee + extraDeliveryFee;
+const delivery_fee = baseDeliveryFee + extraDeliveryFee;
 const totalAmount = isDelivery
-    ? basePriceValue + addonsSubtotal + totalDeliveryFee
+    ? basePriceValue + addonsSubtotal + delivery_fee
     : basePriceValue + addonsSubtotal;
 
         // Build addOns array from the table

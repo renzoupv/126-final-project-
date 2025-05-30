@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LMS - Staff Sign In</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to bottom, 
+                #6DB7DB 0%, 
+                #6DB7DB 85%, 
+                #6C6B6B 85%, 
+                #6C6B6B 100%
+            );
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+            overflow-y: hidden;
+            justify-content: flex-start;
+            padding-top: 5vh;
+        }
+        
+        .header {
+            text-align: center;
+            margin: 5vh 0 3vh 0;
+            color: white;
+            position: relative;
+            z-index: 4;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 80px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            line-height: 1.2;
+        }
+        
+        .header .system-name {
+            font-size: 34px;
+            font-weight: 300;
+            margin-top: 10px;
+        }
+        
+        .container {
+            background-color: #6C6B6B;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            width: 270px;
+            text-align: center;
+            color: white;
+            position: relative;
+            z-index: 5;
+            border: 1px solid #5A5A5A;
+            margin-top: 2vh;
+            opacity: 0.9;
+        }
+
+        .bottom-images {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            position: absolute;
+            bottom: 5%;
+            width: 100%;
+            padding: 0 20px;
+            z-index: 3;
+        }
+
+        .bottom-images img {
+            width: 900px;
+            height: 550px;
+        }
+        
+        .decoration {
+            position: absolute;
+            width: 280px;
+            height: 280px;
+            z-index: 2;
+        }
+        
+        .decoration.top-left {
+            top: 10%;
+            left: 20%;
+            transform: translate(-50%, -50%) rotate(-15deg);
+        }
+        
+        .decoration.bottom-right {
+            bottom: 75%;
+            right: 20%;
+            transform: translate(50%, 50%) rotate(40deg);
+        }
+        
+        h2 {
+            color: white;
+            margin: 0 0 25px 0;
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .user-icon {
+            width: 70px;
+            height: 70px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 32px;
+        }
+        
+        .form-group {
+            margin-bottom: 18px;
+            text-align: left;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 6px;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 15px;
+            background-color: rgba(255, 255, 255, 0.9);
+        }
+        
+        button {
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            padding: 12px;
+            width: 100%;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #3a7bc8;
+        }
+        
+        .footer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 10%;
+            background-color: #6C6B6B;
+            z-index: 1;
+        }
+        
+        .error-message {
+            color: #ff6b6b;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Decorative Images -->
+    <img src="images/bubbles.png" class="decoration top-left" alt="Decorative icon">
+    <img src="images/bubbles.png" class="decoration bottom-right" alt="Decorative icon">
+
+    <div class="header">
+        <h1>Welcome to LMS</h1>
+        <div class="system-name">Laundry Management System</div>
+    </div>
+    
+    <div class="container">
+        <h2>Sign In</h2>
+        
+        <div class="user-icon">👤</div>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" placeholder="Enter username" required>
+                <div id="usernameError" class="error-message">Username is required</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="Enter password" required>
+                <div id="passwordError" class="error-message">Password is required</div>
+            </div>
+            
+            <button type="submit">Sign In</button>
+            <div id="loginError" class="error-message" style="text-align: center; margin-top: 10px;"></div>
+        </form>
+    </div>
+
+    <div class="bottom-images">
+        <img src="images/laundry.png" alt="Washing icon">
+        <img src="images/rack.png" alt="Washing icon">
+    </div>
+    
+    <div class="footer"></div>
+
+    <script>
+        // User database (in a real app, this would be server-side)
+        const users = {
+            'admin': {
+                password: 'admin123',
+                role: 'admin',
+                name: 'Administrator'
+            },
+            'staff': {
+                password: 'staff123',
+                role: 'staff',
+                name: 'Staff Member'
+            }
+        };
+
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Clear previous errors
+            document.querySelectorAll('.error-message').forEach(el => {
+                el.style.display = 'none';
+            });
+            
+            // Get input values
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            let isValid = true;
+            
+            // Validation
+            if (!username) {
+                document.getElementById('usernameError').style.display = 'block';
+                isValid = false;
+            }
+            if (!password) {
+                document.getElementById('passwordError').style.display = 'block';
+                isValid = false;
+            }
+            if (!isValid) return;
+            
+            // Check credentials
+            const user = users[username];
+            const loginError = document.getElementById('loginError');
+            
+            if (user && user.password === password) {
+                // Store user session
+                localStorage.setItem('isLoggedIn', 'true');
+                localStorage.setItem('userRole', user.role);
+                localStorage.setItem('userName', user.name);
+                
+                // Redirect based on role
+                window.location.href = 'Order_Tracker_Page.html';
+            } else {
+                loginError.textContent = 'Invalid username or password';
+                loginError.style.display = 'block';
+            }
+        });
+
+        // Simple input validation on blur
+        document.getElementById('username').addEventListener('blur', function() {
+            if (!this.value.trim()) {
+                document.getElementById('usernameError').style.display = 'block';
+            }
+        });
+        
+        document.getElementById('password').addEventListener('blur', function() {
+            if (!this.value.trim()) {
+                document.getElementById('passwordError').style.display = 'block';
+            }
+        });
+        
+        // Hide error when typing
+        document.getElementById('username').addEventListener('input', function() {
+            if (this.value.trim()) {
+                document.getElementById('usernameError').style.display = 'none';
+            }
+        });
+        
+        document.getElementById('password').addEventListener('input', function() {
+            if (this.value.trim()) {
+                document.getElementById('passwordError').style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
